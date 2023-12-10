@@ -257,6 +257,10 @@ public class Settings {
   public static final String KEY_ACCOUNT_INFO_SUFFIX_FLAGS = "flags"; // premium, verified, etc
   public static final String KEY_ACCOUNT_INFO_SUFFIX_NAME1 = "name1"; // first_name
   public static final String KEY_ACCOUNT_INFO_SUFFIX_NAME2 = "name2"; // last_name
+  public static final String KEY_ACCOUNT_INFO_SUFFIX_ACCENT_COLOR_ID = "accent_id"; // accent_color_id
+  public static final String KEY_ACCOUNT_INFO_SUFFIX_ACCENT_BUILT_IN_ACCENT_COLOR_ID = "accent_builtin"; // accent_color_id
+  public static final String KEY_ACCOUNT_INFO_SUFFIX_LIGHT_THEME_COLORS = "accent_light"; // accent_light
+  public static final String KEY_ACCOUNT_INFO_SUFFIX_DARK_THEME_COLORS = "accent_dark"; // accent_dark
   public static final String KEY_ACCOUNT_INFO_SUFFIX_USERNAME = "username"; // username
   public static final String KEY_ACCOUNT_INFO_SUFFIX_USERNAMES_ACTIVE = "usernames_active"; // username
   public static final String KEY_ACCOUNT_INFO_SUFFIX_USERNAMES_DISABLED = "usernames_disabled"; // last_name
@@ -497,6 +501,7 @@ public class Settings {
   public static final long TUTORIAL_BRUSH_COLOR_TONE = 1 << 17;
   public static final long TUTORIAL_QR_SCAN = 1 << 18;
   public static final long TUTORIAL_SELECT_LANGUAGE_INLINE_MODE = 1 << 19;
+  public static final long TUTORIAL_MULTIPLE_LINK_PREVIEWS = 1 << 20;
 
   @Nullable
   private Long _tutorialFlags;
@@ -592,7 +597,7 @@ public class Settings {
         String[] tags = logTags.tags;
         modules = new ArrayList<>(tags.length + (_modules != null ? _modules.size() : 0));
         Collections.addAll(modules, tags);
-      } catch (Client.ExecutionError error) {
+      } catch (Client.ExecutionException error) {
         modules = new ArrayList<>(_modules != null ? _modules.size() : 0);
       }
       if (_modules != null) {
@@ -609,7 +614,7 @@ public class Settings {
       try {
         Client.execute(new TdApi.SetLogTagVerbosityLevel(module, verbosityLevel));
         return true;
-      } catch (Client.ExecutionError error) {
+      } catch (Client.ExecutionException error) {
         return false;
       }
     }
@@ -618,7 +623,7 @@ public class Settings {
       try {
         Client.execute(new TdApi.SetLogVerbosityLevel(globalVerbosityLevel));
         return true;
-      } catch (Client.ExecutionError error) {
+      } catch (Client.ExecutionException error) {
         return false;
       }
     }
@@ -673,7 +678,7 @@ public class Settings {
               remove(verbosityKey + "_" + module);
             else
               putInt(verbosityKey + "_" + module, verbosity);
-          } catch (Client.ExecutionError ignored) { }
+          } catch (Client.ExecutionException ignored) { }
         }
       }
     }
@@ -695,7 +700,7 @@ public class Settings {
         TdApi.Function<TdApi.LogVerbosityLevel> function = StringUtils.isEmpty(module) ? new TdApi.GetLogVerbosityLevel() : new TdApi.GetLogTagVerbosityLevel(module);
         TdApi.LogVerbosityLevel logVerbosityLevel = Client.execute(function);
         return logVerbosityLevel.verbosityLevel;
-      } catch (Client.ExecutionError error) {
+      } catch (Client.ExecutionException error) {
         return TDLIB_LOG_VERBOSITY_UNKNOWN;
       }
     }
@@ -740,7 +745,7 @@ public class Settings {
       }
       try {
         Client.execute(new TdApi.SetLogStream(stream));
-      } catch (Client.ExecutionError error) {
+      } catch (Client.ExecutionException error) {
         Runnable act = () -> {
           Tracer.onTdlibFatalError(null, TdApi.SetLogStream.class, error.error, new RuntimeException().getStackTrace());
         };

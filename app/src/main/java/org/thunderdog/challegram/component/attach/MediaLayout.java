@@ -1939,14 +1939,12 @@ public class MediaLayout extends FrameLayoutFix implements
   }
 
   private void setNewMessageSender (TdApi.ChatMessageSender sender) {
-    tdlib().send(new TdApi.SetChatMessageSender(getTargetChatId(), sender.sender), ignored -> {
-      UI.post(() -> {
-        TdApi.Chat chat = getTargetChat();
-        if (senderSendIcon != null) {
-          senderSendIcon.update(chat != null ? chat.messageSenderId : null);
-        }
-      });
-    });
+    tdlib().send(new TdApi.SetChatMessageSender(getTargetChatId(), sender.sender), tdlib().typedOkHandler(() -> {
+      TdApi.Chat chat = getTargetChat();
+      if (senderSendIcon != null) {
+        senderSendIcon.update(chat != null ? chat.messageSenderId : null);
+      }
+    }));
   }
 
   public boolean showSlowModeRestriction (View v) {

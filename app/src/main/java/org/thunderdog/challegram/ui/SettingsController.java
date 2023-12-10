@@ -91,7 +91,6 @@ import me.vkryl.core.StringUtils;
 import me.vkryl.core.collection.IntList;
 import me.vkryl.core.lambda.CancellableRunnable;
 import me.vkryl.core.reference.ReferenceList;
-import me.vkryl.td.ChatId;
 import me.vkryl.td.Td;
 
 public class SettingsController extends ViewController<Void> implements
@@ -556,7 +555,7 @@ public class SettingsController extends ViewController<Void> implements
 
     items.add(new ListItem(ListItem.TYPE_EMPTY_OFFSET));
     if (Settings.instance().showPeerIds()) {
-      items.add(new ListItem(ListItem.TYPE_INFO_SETTING, R.id.btn_peer_id, R.drawable.baseline_code_24, R.string.UserId).setContentStrings(R.string.LoadingInformation, R.string.LoadingInformation));
+      items.add(new ListItem(ListItem.TYPE_INFO_SETTING, R.id.btn_peer_id, R.drawable.baseline_identifier_24, R.string.UserId).setContentStrings(R.string.LoadingInformation, R.string.LoadingInformation));
       items.add(new ListItem(ListItem.TYPE_SEPARATOR));
     }
     items.add(new ListItem(ListItem.TYPE_INFO_SETTING, R.id.btn_username, R.drawable.baseline_alternate_email_24, R.string.Username).setContentStrings(R.string.LoadingUsername, R.string.SetUpUsername));
@@ -978,10 +977,15 @@ public class SettingsController extends ViewController<Void> implements
       c.setArguments(new EditBioController.Arguments(about != null ? about.text : "", 0));
       navigateTo(c);
     } else if (viewId == R.id.btn_peer_id) {
-      long myId = tdlib.myUserId(true);
-      if (myId != 0) {
-        UI.copyText(Long.toString(myId), R.string.CopiedMyUserId);
-      }
+      long selfId = tdlib.myUserId(true);
+      if (selfId == 0) return;
+
+      showOptions(Long.toString(selfId), new int[]{R.id.btn_peer_id_copy}, new String[]{Lang.getString(R.string.Copy)}, null, new int[]{R.drawable.baseline_content_copy_24}, (itemView, id) -> {
+        if (id == R.id.btn_peer_id_copy) {
+          UI.copyText(Long.toString(selfId), R.string.CopiedMyUserId);
+        }
+        return true;
+      });
     } else if (viewId == R.id.btn_languageSettings) {
       navigateTo(new SettingsLanguageController(context, tdlib));
     } else if (viewId == R.id.btn_notificationSettings) {

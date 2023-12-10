@@ -20,7 +20,6 @@ import org.thunderdog.challegram.component.chat.MessagesManager;
 import org.thunderdog.challegram.data.AvatarPlaceholder;
 import org.thunderdog.challegram.data.TD;
 import org.thunderdog.challegram.loader.ImageFile;
-import org.thunderdog.challegram.theme.ColorId;
 import org.thunderdog.challegram.util.text.Letters;
 
 import me.vkryl.core.BitwiseUtils;
@@ -122,10 +121,11 @@ public class TdlibSender {
         break;
       case TdApi.MessageSponsorTypePrivateChannel.CONSTRUCTOR:
       case TdApi.MessageSponsorTypeWebsite.CONSTRUCTOR:
+      case TdApi.MessageSponsorTypeWebApp.CONSTRUCTOR:
         sender = null;
         break;
       default:
-        Td.assertMessageSponsorType_ce9e3245();
+        Td.assertMessageSponsorType_cdabde01();
         throw Td.unsupported(sponsor.type);
     }
     if (sender != null) {
@@ -138,7 +138,7 @@ public class TdlibSender {
       String name = tdlib.sponsorName(sponsor);
       this.name = this.nameShort = name;
       this.letters = TD.getLetters(this.name);
-      this.placeholderMetadata = new AvatarPlaceholder.Metadata(ColorId.avatarGreen, this.letters);
+      this.placeholderMetadata = new AvatarPlaceholder.Metadata(tdlib.accentColor(TdlibAccentColor.BuiltInId.GREEN), this.letters);
     }
   }
 
@@ -212,12 +212,8 @@ public class TdlibSender {
     return placeholderMetadata;
   }
 
-  public int getAvatarColorId () {
-    return placeholderMetadata.colorId;
-  }
-
-  public int getNameColorId () {
-    return TD.getNameColorId(getAvatarColorId());
+  public TdlibAccentColor getAccentColor () {
+    return placeholderMetadata.accentColor;
   }
 
   public ImageFile getAvatar () {
@@ -226,8 +222,10 @@ public class TdlibSender {
         return tdlib.chatAvatar(((TdApi.MessageSenderChat) sender).chatId);
       case TdApi.MessageSenderUser.CONSTRUCTOR:
         return tdlib.cache().userAvatar(((TdApi.MessageSenderUser) sender).userId);
+      default:
+        Td.assertMessageSender_439d4c9c();
+        throw Td.unsupported(sender);
     }
-    throw new AssertionError();
   }
 
   // flags
