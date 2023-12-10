@@ -37,12 +37,11 @@ public class MediaGalleryAdapter extends RecyclerView.Adapter<MediaGalleryAdapte
     boolean onPhotoOrVideoOpenRequested (ImageFile fromFile);
   }
 
-  public static final int OPTION_SELECTABLE = 1;
-  public static final int OPTION_ALWAYS_SELECTABLE = 1 << 1;
-  public static final int OPTION_NEED_COUNTER = 1 << 2;
-  public static final int OPTION_CAMERA_AVAILABLE = 1 << 3;
-  public static final int OPTION_NEED_CAMERA = 1 << 4;
-  public static final int OPTION_NEVER_SELECTABLE = 1 << 5;
+  public static final int OPTION_SELECTABLE = 0x01;
+  public static final int OPTION_ALWAYS_SELECTABLE = 0x02;
+  public static final int OPTION_NEED_COUNTER = 0x04;
+  public static final int OPTION_CAMERA_AVAILABLE = 0x08;
+  public static final int OPTION_NEED_CAMERA = 0x10;
 
   private final Context context;
   private final RecyclerView parent;
@@ -50,7 +49,6 @@ public class MediaGalleryAdapter extends RecyclerView.Adapter<MediaGalleryAdapte
   private final Callback callback;
   private final boolean isSelectable;
   private final boolean isAlwaysSelectable; // when we click on a first photo, it will be selected
-  private final boolean isNeverSelectable; // hide all checkboxes
   private final boolean needCounter;
   private final boolean cameraAvailable;
   private boolean animationsEnabled;
@@ -66,7 +64,6 @@ public class MediaGalleryAdapter extends RecyclerView.Adapter<MediaGalleryAdapte
     this.needCounter = (options & OPTION_NEED_COUNTER) != 0;
     this.cameraAvailable = false; // (options & OPTION_CAMERA_AVAILABLE) != 0 && (!Config.CUSTOM_CAMERA_ENABLED || (options & OPTION_NEED_CAMERA) != 0);
     this.showCamera = cameraAvailable && (options & OPTION_NEED_CAMERA) != 0;
-    this.isNeverSelectable = (options & OPTION_NEVER_SELECTABLE) != 0;
     this.selected = new ArrayList<>();
   }
 
@@ -247,7 +244,6 @@ public class MediaGalleryAdapter extends RecyclerView.Adapter<MediaGalleryAdapte
         ImageFile imageFile = images.get(showCamera ? position - 1 : position);
         holder.setImage(imageFile, getSelectionIndex(imageFile), isSelectable, isVisible(imageFile));
         holder.setAnimationsDisabled(!animationsEnabled);
-        ((MediaGalleryImageView) holder.itemView).setAlwaysInvisible(isNeverSelectable);
         break;
       }
       case MediaHolder.VIEW_TYPE_COUNTER: {
@@ -297,7 +293,7 @@ public class MediaGalleryAdapter extends RecyclerView.Adapter<MediaGalleryAdapte
   public void onClick (View view, boolean isSelect) {
     ImageFile image = ((MediaGalleryImageView) view).getImage();
 
-    if ((!isSelect || isNeverSelectable) && callback.onPhotoOrVideoOpenRequested(image)) {
+    if (!isSelect && callback.onPhotoOrVideoOpenRequested(image)) {
       return;
     }
 

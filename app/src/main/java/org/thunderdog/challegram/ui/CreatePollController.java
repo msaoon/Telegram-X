@@ -271,10 +271,10 @@ public class CreatePollController extends RecyclerViewController<CreatePollContr
     super.onFocus();
     if (currentMenu == null) {
       currentMenu = tdlib.ui().createSimpleHapticMenu(this, getArgumentsStrict().chatId, this::canSendPoll, () -> {
-        TdApi.FormattedText explanation = getExplanation(false);
-        return explanation != null && explanation.text.trim().length() <= TdConstants.MAX_QUIZ_EXPLANATION_LENGTH && Td.parseMarkdown(explanation);
-      }, null, null, this::send, null)
-              .attachToView(getDoneButton());
+          TdApi.FormattedText explanation = getExplanation(false);
+          return explanation != null && explanation.text.trim().length() <= TdConstants.MAX_QUIZ_EXPLANATION_LENGTH && Td.parseMarkdown(explanation);
+        }, null, null, this::send, null)
+        .attachToView(getDoneButton());
     }
   }
 
@@ -647,12 +647,6 @@ public class CreatePollController extends RecyclerViewController<CreatePollContr
     final ThreadInfo messageThread = args.messageThread;
     if (sendOptions.schedulingState == null && args.callback.areScheduledOnly(this)) {
       tdlib.ui().showScheduleOptions(this, chatId, false, (modifiedSendOptions, disableMarkdown1) -> send(modifiedSendOptions, disableMarkdown), sendOptions, null);
-      return;
-    }
-
-    final CharSequence slowModeRestrictionText = tdlib.getSlowModeRestrictionText(chatId, sendOptions.schedulingState);
-    if (slowModeRestrictionText != null) {
-      context().tooltipManager().builder(getDoneButton()).controller(this).show(tdlib, slowModeRestrictionText).hideDelayed();
       return;
     }
 

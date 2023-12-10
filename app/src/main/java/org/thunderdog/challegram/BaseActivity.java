@@ -1809,7 +1809,7 @@ public abstract class BaseActivity extends ComponentActivity implements View.OnT
         PopupLayout window = windows.get(i);
         View boundView = window.getBoundView();
         ViewController<?> boundController = window.getBoundController();
-        if (isContextual(boundView) || (byNavigation && boundView instanceof StickerSetWrap) || (boundView instanceof MediaLayout && !((navigation.getCurrentStackItem() instanceof MessagesController) || (((MediaLayout) boundView).getMode() == MediaLayout.MODE_AVATAR_PICKER))) || (byNavigation && isContextual(boundController)) ) {
+        if (isContextual(boundView) || (byNavigation && boundView instanceof StickerSetWrap) || (boundView instanceof MediaLayout && !(navigation.getCurrentStackItem() instanceof MessagesController)) || (byNavigation && isContextual(boundController)) ) {
           window.hideWindow(true);
         }
       }
@@ -2415,10 +2415,10 @@ public abstract class BaseActivity extends ComponentActivity implements View.OnT
   }
 
   private static String[] locationPermissions (boolean needBackground) {if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q && Config.REQUEST_BACKGROUND_LOCATION && needBackground) {
-      return new String[]{Manifest.permission.ACCESS_BACKGROUND_LOCATION, Manifest.permission.ACCESS_FINE_LOCATION, Manifest.permission.ACCESS_COARSE_LOCATION};
-    } else {
-      return new String[]{Manifest.permission.ACCESS_FINE_LOCATION, Manifest.permission.ACCESS_COARSE_LOCATION};
-    }
+    return new String[]{Manifest.permission.ACCESS_BACKGROUND_LOCATION, Manifest.permission.ACCESS_FINE_LOCATION, Manifest.permission.ACCESS_COARSE_LOCATION};
+  } else {
+    return new String[]{Manifest.permission.ACCESS_FINE_LOCATION, Manifest.permission.ACCESS_COARSE_LOCATION};
+  }
   }
 
   private void requestLocationPermissionImpl (boolean needBackground, ActivityPermissionResult handler) {
@@ -2633,10 +2633,10 @@ public abstract class BaseActivity extends ComponentActivity implements View.OnT
     return !(
       // getCurrentPopupWindow() != null ||
       (cameraAnimator != null && cameraAnimator.isAnimating()) ||
-      activityState != UI.State.RESUMED ||
-      recordAudioVideoController.isOpen() ||
-      isCameraOwnershipTaken ||
-      isNavigationBusy()
+        activityState != UI.State.RESUMED ||
+        recordAudioVideoController.isOpen() ||
+        isCameraOwnershipTaken ||
+        isNavigationBusy()
     );
   }
 
@@ -3040,17 +3040,15 @@ public abstract class BaseActivity extends ComponentActivity implements View.OnT
   }
 
   private void initializeCamera (ViewController.CameraOpenOptions options) {
-    final boolean needCreateCamera = camera == null;
-    if (needCreateCamera) {
+    if (camera == null) {
       camera = new CameraController(this);
-    }
-    camera.setMode(options.mode, options.readyListener);
-    camera.setAvatarPickerMode(options.avatarPickerMode);
-    camera.setQrListener(options.qrCodeListener, options.qrModeSubtitle, options.qrModeDebug);
-    camera.setMediaEditorDelegates(options.delegate, options.selectDelegate, options.sendDelegate);
-    if (needCreateCamera) {
+      camera.setMode(options.mode, options.readyListener);
+      camera.setQrListener(options.qrCodeListener, options.qrModeSubtitle, options.qrModeDebug);
       camera.getValue(); // Ensure view creation
       addActivityListener(camera);
+    } else {
+      camera.setMode(options.mode, options.readyListener);
+      camera.setQrListener(options.qrCodeListener, options.qrModeSubtitle, options.qrModeDebug);
     }
     hideContextualPopups(false);
     closeAllMedia(true);

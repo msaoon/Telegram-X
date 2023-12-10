@@ -932,7 +932,7 @@ public class ShareController extends TelegramViewController<ShareController.Args
   public boolean accept (TdApi.Chat chat) {
     if (tdlib.chatAvailable(chat)) {
       Tdlib.RestrictionStatus restrictionStatus = tdlib.getRestrictionStatus(chat, RightId.SEND_BASIC_MESSAGES);
-      return restrictionStatus == null || !restrictionStatus.isGlobal() || tdlib.canSendSendSomeMedia(chat, true);
+      return restrictionStatus == null || !restrictionStatus.isGlobal();
     }
     return false;
   }
@@ -1757,12 +1757,6 @@ public class ShareController extends TelegramViewController<ShareController.Args
   private CharSequence getErrorMessage (long chatId) {
     Args args = getArgumentsStrict();
     TdApi.Chat chat = tdlib.chatStrict(chatId);
-
-    CharSequence slowModeRestrictionText = tdlib().getSlowModeRestrictionText(chatId);
-    if (slowModeRestrictionText != null) {
-      return slowModeRestrictionText;
-    }
-
     switch (mode) {
       case MODE_TEXT: {
         return tdlib.getBasicMessageRestrictionText(chat);
@@ -1869,27 +1863,18 @@ public class ShareController extends TelegramViewController<ShareController.Args
     boolean result = !isChecked(chatId);
 
     if (result) {
-      if (performAsyncChecks) {
-        // FIXME: view recycling safety
-        // By the time `after` is called, initial view could have been already recycled.
-        // Current implementation relies on the quick response from GetUserFull,
-        // however, there's a chance `view` could have been already taken by some other view.
-        // Should be fixed inside `after` contents.
-        if (ChatId.isUserChat(chatId) && hasVoiceOrVideoMessageContent()) {
-          lockedChatIds.add(chatId);
-          tdlib.cache().userFull(tdlib.chatUserId(chatId), userFullInfo -> {
-            lockedChatIds.remove(chatId);
-            toggleCheckedImpl(view, chat, after, false);
-          });
-          return false;
-        } else if (ChatId.isSupergroup(chatId)) {
-          lockedChatIds.add(chatId);
-          tdlib.cache().supergroupFull(ChatId.toSupergroupId(chatId), supergroupFullInfo -> {
-            lockedChatIds.remove(chatId);
-            toggleCheckedImpl(view, chat, after, false);
-          });
-          return false;
-        }
+      if (performAsyncChecks && ChatId.isUserChat(chatId) && hasVoiceOrVideoMessageContent()) {
+        lockedChatIds.add(chatId);
+        tdlib.cache().userFull(tdlib.chatUserId(chatId), userFullInfo -> {
+          lockedChatIds.remove(chatId);
+          // FIXME: view recycling safety
+          // By the time `after` is called, initial view could have been already recycled.
+          // Current implementation relies on the quick response from GetUserFull,
+          // however, there's a chance `view` could have been already taken by some other view.
+          // Should be fixed inside `after` contents.
+          toggleCheckedImpl(view, chat, after, false);
+        });
+        return false;
       }
       if (showErrorMessage(view, chatId, false)) {
         result = false;
