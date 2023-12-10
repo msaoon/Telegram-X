@@ -576,7 +576,7 @@ public class MediaBottomGalleryController extends MediaBottomBaseController<Medi
       MediaViewController controller = new MediaViewController(context, tdlib);
       controller.setArguments(
         MediaViewController.Args.fromGallery(this, this, this, this, stack, mediaLayout.areScheduledOnly())
-          .setReceiverChatId(mediaLayout.getTargetChatId()).setAvatarPickerMode(mediaLayout.getAvatarPickerMode())
+          .setReceiverChatId(mediaLayout.getTargetChatId())
       );
       controller.open();
 

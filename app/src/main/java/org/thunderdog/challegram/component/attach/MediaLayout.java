@@ -1005,9 +1005,6 @@ public class MediaLayout extends FrameLayoutFix implements
     if (showKeyboardOnHide && target != null) {
       target.showKeyboard();
     }
-    if (sendButton != null) {
-      sendButton.destroySlowModeCounterController();
-    }
     ThemeManager.instance().removeThemeListener(this);
     Lang.removeLanguageListener(this);
     if (target != null) {
@@ -1394,7 +1391,6 @@ public class MediaLayout extends FrameLayoutFix implements
         }
       };
       sendButton.setId(R.id.btn_send);
-      sendButton.getSlowModeCounterController(tdlib()).setCurrentChat(getTargetChatId());
       themeListeners.addThemeFilterListener(sendButton, ColorId.chatSendButton);
       sendButton.setLayoutParams(FrameLayoutFix.newParams(Screen.dp(55f), ViewGroup.LayoutParams.MATCH_PARENT, Gravity.RIGHT));
       Views.setClickable(sendButton);

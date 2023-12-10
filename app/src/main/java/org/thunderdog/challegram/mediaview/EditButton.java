@@ -18,22 +18,17 @@ import android.content.Context;
 import android.graphics.Bitmap;
 import android.graphics.Canvas;
 import android.graphics.Paint;
-import android.graphics.Path;
-import android.graphics.RectF;
 import android.graphics.drawable.Drawable;
 import android.view.MotionEvent;
 import android.view.View;
 
-import androidx.annotation.ColorInt;
 import androidx.annotation.DrawableRes;
 
 import org.thunderdog.challegram.R;
-import org.thunderdog.challegram.telegram.Tdlib;
 import org.thunderdog.challegram.tool.Drawables;
 import org.thunderdog.challegram.tool.Paints;
 import org.thunderdog.challegram.tool.Screen;
 import org.thunderdog.challegram.tool.Views;
-import org.thunderdog.challegram.widget.SendButton;
 
 import me.vkryl.android.AnimatorUtils;
 import me.vkryl.android.animator.FactorAnimator;
@@ -280,27 +275,10 @@ public class EditButton extends View implements FactorAnimator.Target {
   private static final float MIN_SCALE = USE_SCALE ? .78f : 1f;
   private static final float STEP_FACTOR = USE_SCALE ? .45f : .5f;
 
-
-  private final Path clipPath = new Path();
-
-  private void checkClipPath (RectF currentRect) {
-    final float radius = Math.min(currentRect.height(), currentRect.width()) / 2f;
-    clipPath.reset();
-    clipPath.addRect(0, 0, getMeasuredWidth(), getMeasuredHeight(), Path.Direction.CW);
-    clipPath.addRoundRect(currentRect, radius, radius, Path.Direction.CCW);
-    clipPath.close();
-  }
-
-
-  @ColorInt
-  private int getCurrentIconColor () {
-    float activeFactor = iconRes != R.drawable.baseline_volume_up_24 ? this.activeFactor : 0f;
-    return changer.getColor(activeFactor);
-  }
-
   @Override
   protected void onDraw (Canvas c) {
-    Paint paint = Paints.getPorterDuffPaint(getCurrentIconColor());
+    float activeFactor = iconRes != R.drawable.baseline_volume_up_24 ? this.activeFactor : 0f;
+    Paint paint = Paints.getPorterDuffPaint(changer.getColor(activeFactor));
 
     int centerX = getMeasuredWidth() / 2;
     int centerY = getMeasuredHeight() / 2;
@@ -320,15 +298,6 @@ public class EditButton extends View implements FactorAnimator.Target {
 
     if (alpha == 0f) {
       return;
-    }
-
-    final boolean needDrawSlowModeCounter = slowModeCounterController != null && slowModeCounterController.isVisible();
-    int clipSaveTo = -1;
-    if (needDrawSlowModeCounter) {
-      slowModeCounterController.draw(c, centerX, centerY);
-      checkClipPath(slowModeCounterController.lastCounterDrawRect);
-      clipSaveTo = Views.save(c);
-      c.clipPath(clipPath);
     }
 
     if (alpha != 1f) {
@@ -376,29 +345,5 @@ public class EditButton extends View implements FactorAnimator.Target {
 
       c.drawCircle(centerX, getMeasuredHeight() - Screen.dp(9.5f), Screen.dp(2f), Paints.fillingPaint(color));
     }
-
-    if (needDrawSlowModeCounter) {
-      Views.restore(c, clipSaveTo);
-    }
-  }
-
-  private SendButton.SlowModeCounterController slowModeCounterController;
-
-  public void destroySlowModeCounterController () {
-    if (slowModeCounterController != null) {
-      slowModeCounterController.performDestroy();
-      slowModeCounterController = null;
-    }
-  }
-
-  public SendButton.SlowModeCounterController getSlowModeCounterController (Tdlib tdlib) {
-    if (slowModeCounterController != null && slowModeCounterController.tdlib() != tdlib) {
-      destroySlowModeCounterController();
-    }
-
-    if (slowModeCounterController == null) {
-      slowModeCounterController = new SendButton.SlowModeCounterController(tdlib, this, () -> getCurrentIconColor(), true);
-    }
-    return slowModeCounterController;
   }
 }

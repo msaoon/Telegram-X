@@ -2681,9 +2681,6 @@ public class MessagesController extends ViewController<MessagesController.Argume
       clearSelectedMessageIds();
     }
 
-    if (sendButton != null) {
-      sendButton.getSlowModeCounterController(tdlib).setCurrentChat(getChatId());
-    }
     clearSwitchPmButton();
     clearReply();
 
@@ -3024,9 +3021,6 @@ public class MessagesController extends ViewController<MessagesController.Argume
 
   private void updateBottomBar (boolean isUpdate) {
     setInputBlockFlag(FLAG_INPUT_TEXT_DISABLED, !tdlib.canSendBasicMessage(chat));
-    if (sendButton != null) {
-      sendButton.getSlowModeCounterController(tdlib).updateSlowModeTimer(isUpdate);
-    }
 
     if (isUpdate) {
       updateInputHint();
@@ -4133,10 +4127,6 @@ public class MessagesController extends ViewController<MessagesController.Argume
 
     if (reactionsButton != null) {
       reactionsButton.performDestroy();
-    }
-
-    if (sendButton != null) {
-      sendButton.destroySlowModeCounterController();
     }
 
     // messagesView.clear();
