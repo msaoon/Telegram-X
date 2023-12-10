@@ -19,7 +19,6 @@ import android.content.Context;
 import android.graphics.BitmapFactory;
 import android.graphics.Canvas;
 import android.graphics.Paint;
-import android.graphics.drawable.Drawable;
 import android.net.Uri;
 import android.os.Build;
 import android.text.Editable;
@@ -49,7 +48,6 @@ import android.view.inputmethod.EditorInfo;
 import android.view.inputmethod.InputConnection;
 import android.widget.LinearLayout;
 
-import androidx.annotation.DrawableRes;
 import androidx.annotation.IdRes;
 import androidx.annotation.IntDef;
 import androidx.annotation.NonNull;
@@ -93,12 +91,9 @@ import org.thunderdog.challegram.navigation.ViewController;
 import org.thunderdog.challegram.receiver.RefreshRateLimiter;
 import org.thunderdog.challegram.telegram.RightId;
 import org.thunderdog.challegram.telegram.Tdlib;
-import org.thunderdog.challegram.theme.ColorId;
 import org.thunderdog.challegram.theme.Theme;
-import org.thunderdog.challegram.tool.Drawables;
 import org.thunderdog.challegram.tool.Fonts;
 import org.thunderdog.challegram.tool.Paints;
-import org.thunderdog.challegram.tool.PorterDuffPaint;
 import org.thunderdog.challegram.tool.Screen;
 import org.thunderdog.challegram.tool.Strings;
 import org.thunderdog.challegram.tool.UI;
@@ -137,7 +132,6 @@ public class InputView extends NoClipEditText implements InlineSearchContext.Cal
 
   private Text placeholderTitle;
   private Text placeholderSubTitle;
-  private Drawable placeholderIcon;
 
   private CharSequence placeholderTitleText;
   private CharSequence placeholderSubtitleText;
@@ -839,7 +833,7 @@ public class InputView extends NoClipEditText implements InlineSearchContext.Cal
       return;
     }
     this.rawPlaceholder = placeholder;
-    setInputPlaceholder(placeholder, null, 0);
+    setInputPlaceholder(placeholder, null);
     /*if (controller == null) {
       // setHint(placeholder);
     } else {
@@ -849,10 +843,9 @@ public class InputView extends NoClipEditText implements InlineSearchContext.Cal
     }*/
   }
 
-  public void setInputPlaceholder (CharSequence placeholder, CharSequence placeholderSubtitle, @DrawableRes int iconId) {
+  public void setInputPlaceholder (CharSequence placeholder, CharSequence placeholderSubtitle) {
     this.placeholderTitleText = placeholder;
     this.placeholderSubtitleText = placeholderSubtitle;
-    this.placeholderIcon = iconId != 0 ? Drawables.get(getResources(), iconId) : null;
     if (controller != null) {
       this.lastPlaceholderAvailWidth = 0;
       checkPlaceholderWidth();
@@ -865,8 +858,8 @@ public class InputView extends NoClipEditText implements InlineSearchContext.Cal
   }
 
   public void checkPlaceholderWidth () {
-    if ((lastPlaceholderRes != 0 || !StringUtils.isEmpty(placeholderTitleText) || placeholderIcon != null) && controller != null) {
-      int availWidth = Math.max(0, getMeasuredWidth() - controller.getHorizontalInputPadding() - getPaddingLeft() - Screen.dp(placeholderIcon != null ? 20 : 0));
+    if ((lastPlaceholderRes != 0 || !StringUtils.isEmpty(placeholderTitleText)) && controller != null) {
+      int availWidth = Math.max(0, getMeasuredWidth() - controller.getHorizontalInputPadding() - getPaddingLeft());
       if (this.lastPlaceholderAvailWidth != availWidth) {
         this.lastPlaceholderAvailWidth = availWidth;
 
@@ -1053,7 +1046,7 @@ public class InputView extends NoClipEditText implements InlineSearchContext.Cal
 
   public void onEmojiSelected (String emoji) {
     TextSelection selection = getTextSelection();
-    if (selection == null || !isEnabled())
+    if (selection == null)
       return;
     int after = selection.start + emoji.length();
     SpannableString s = new SpannableString(emoji);
@@ -1080,7 +1073,7 @@ public class InputView extends NoClipEditText implements InlineSearchContext.Cal
 
   public void onCustomEmojiSelected (TdApi.Sticker stickerObj, boolean needReplace) {
     TextSelection selection = getTextSelection();
-    if (selection == null || !isEnabled())
+    if (selection == null)
       return;
 
     final String emoji = TD.stickerEmoji(stickerObj);
@@ -1125,7 +1118,7 @@ public class InputView extends NoClipEditText implements InlineSearchContext.Cal
     updateMessageHint(chat, messageThread, customInputField, isSilent);
     setDraft(!tdlib.canSendBasicMessage(chat) ? null :
       messageThread != null ? messageThread.getDraftContent() :
-      chat.draftMessage != null ? chat.draftMessage.inputMessageText : null
+        chat.draftMessage != null ? chat.draftMessage.inputMessageText : null
     );
   }
 
@@ -1149,15 +1142,10 @@ public class InputView extends NoClipEditText implements InlineSearchContext.Cal
       return;
     }
     int resource;
-    int icon = 0;
     CharSequence subplaceholder = null;
     Object[] args = null;
     TdApi.ChatMemberStatus status = tdlib.chatStatus(chat.id);
-
-    if (!tdlib.canSendBasicMessage(chat)) {
-      resource = R.string.MessageInputTextDisabled;
-      icon = R.drawable.baseline_block_18;
-    } else if (tdlib.isChannel(chat.id)) {
+    if (tdlib.isChannel(chat.id)) {
       resource = isSilent ? R.string.ChannelSilentBroadcast : R.string.ChannelBroadcast;
     } /*else if (tdlib.isMultiChat(chat) && Td.isAnonymous(status)) {
       resource = messageThread != null ? (messageThread.areComments() ? R.string.CommentAnonymously : R.string.MessageReplyAnonymously) :  R.string.MessageAnonymously;
@@ -1178,7 +1166,7 @@ public class InputView extends NoClipEditText implements InlineSearchContext.Cal
     } else {
       text = customInputField;
     }
-    setInputPlaceholder(text, subplaceholder, icon);
+    setInputPlaceholder(text, subplaceholder);
   }
 
   public void setDraft (@Nullable TdApi.InputMessageContent draftContent) {
@@ -1266,7 +1254,6 @@ public class InputView extends NoClipEditText implements InlineSearchContext.Cal
 
   @Override
   protected void onDraw (Canvas c) {
-    final int x = getPaddingLeft() + Screen.dp(placeholderIcon != null ? 20 : 0);
     final float alpha = showPlaceholder.getFloatValue();
     final int offset = (int) (hasSubPlaceholder.getFloatValue() * (getTextSize() / 18 * 8));
     final int baseline = getBaseline();
@@ -1276,16 +1263,15 @@ public class InputView extends NoClipEditText implements InlineSearchContext.Cal
         final int titleHeight = placeholderTitle.getHeight();
         final int titleBaseline = (int)(titleHeight * 0.75f);
         final int y = baseline - titleBaseline - offset;
-        placeholderTitle.draw(c, x, y, null, alpha);
+        placeholderTitle.draw(c, getPaddingLeft(), y, null, alpha);
+        //c.drawRect(getPaddingLeft(), y, getPaddingLeft() + placeholderTitle.getWidth(), y + placeholderTitle.getHeight(), Paints.strokeSmallPaint(Color.GREEN));
+        //c.drawRect(getPaddingLeft(), y, getPaddingLeft() + placeholderTitle.getWidth(), y + placeholderTitle.getLineHeight(), Paints.strokeSmallPaint(Color.GREEN));
       }
       for (ListAnimator.Entry<Text> entry : subtitleReplaceAnimator) {
         final int offset2 = (int) ((!entry.isAffectingList() ?
           ((entry.getVisibility() - 1f) * (getTextSize() / 18f * 14f)):
           ((1f - entry.getVisibility()) * (getTextSize() / 18f * 14f))));
-        entry.item.draw(c, x, baseline - offset / 2 + offset2, null, Math.min(alpha, entry.getVisibility()));
-      }
-      if (placeholderIcon != null) {
-        Drawables.draw(c, placeholderIcon, getPaddingLeft(), (getMeasuredHeight() - placeholderIcon.getMinimumHeight()) / 2f, PorterDuffPaint.get(ColorId.iconLight) /*Paints.getPorterDuffPaint(ColorId.textPlaceholder)*/);
+        entry.item.draw(c, getPaddingLeft(), baseline - offset / 2 + offset2, null, Math.min(alpha, entry.getVisibility()));
       }
     }
 
@@ -1295,9 +1281,11 @@ public class InputView extends NoClipEditText implements InlineSearchContext.Cal
       String text = getText().toString();
       if (text.equalsIgnoreCase(prefix)) {
         checkPrefix(text);
-        c.drawText(displaySuffix, x + prefixWidth, getBaseline(), paint);
+        c.drawText(displaySuffix, getPaddingLeft() + prefixWidth, getBaseline(), paint);
       }
     }
+    // c.drawRect(0, baseline, getMeasuredWidth(), baseline, Paints.strokeSmallPaint(Color.RED));
+    // c.drawRect(0, 0, getMeasuredWidth(), getMeasuredHeight(), Paints.strokeBigPaint(Color.RED));
   }
 
   // Inline query

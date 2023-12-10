@@ -235,22 +235,16 @@ public abstract class TGMessage implements InvalidateContentProvider, TdlibDeleg
 
   // counters
 
-  private final Counter viewCounter, replyCounter, shareCounter, isPinned, isEdited, isRestricted, isUnsupported;
+  private final Counter viewCounter, replyCounter, shareCounter, isPinned;
   private Counter shrinkedReactionsCounter, reactionsCounter;
   private final ReactionsCounterDrawable reactionsCounterDrawable;
   private final Counter isChannelHeaderCounter;
+  private float isChannelHeaderCounterX, isChannelHeaderCounterY;
 
   private boolean translatedCounterForceShow;
   private final Counter isTranslatedCounter;
   private final TranslationCounterDrawable isTranslatedCounterDrawable;
-
-  // counter last-draw positions
-
-  private final RectF isChannelHeaderCounterLastDrawRect = new RectF();
-  private final RectF isTranslatedCounterLastDrawRect = new RectF();
-  private final RectF isRestrictedCounterLastDrawRect = new RectF();
-  private final RectF isEditedCounterLastDrawRect = new RectF();
-
+  private float isTranslatedCounterX, isTranslatedCounterY;
 
   // forward values
 
@@ -430,28 +424,6 @@ public abstract class TGMessage implements InvalidateContentProvider, TdlibDeleg
       .callback(this)
       .drawable(R.drawable.deproko_baseline_pin_14, 14f, 0f, Gravity.CENTER_HORIZONTAL)
       .build();
-    this.isEdited = new Counter.Builder()
-      .noBackground()
-      .allBold(false)
-      .callback(this)
-      .drawable(R.drawable.baseline_edit_12, 12f, 0f, Gravity.CENTER_HORIZONTAL)
-      .build();
-    this.isEdited.showHide(true, false);
-    this.isRestricted = new Counter.Builder()
-      .noBackground()
-      .allBold(false)
-      .callback(this)
-      .drawable(R.drawable.baseline_warning_14, 14f, 0f, Gravity.CENTER_HORIZONTAL)
-      .colorSet(() -> Theme.getColor(ColorId.messageNegativeLine))
-      .build();
-    this.isRestricted.showHide(true, false);
-    this.isUnsupported = new Counter.Builder()
-      .noBackground()
-      .allBold(false)
-      .callback(this)
-      .drawable(R.drawable.baseline_info_14, 14f, 0f, Gravity.CENTER_HORIZONTAL)
-      .build();
-    this.isUnsupported.showHide(true, false);
     this.isChannelHeaderCounter = new Counter.Builder()
       .noBackground()
       .allBold(false)
@@ -1456,10 +1428,6 @@ public abstract class TGMessage implements InvalidateContentProvider, TdlibDeleg
     return !headerDisabled() && (isEdited() || isBeingEdited()) && msg.viaBotUserId == 0 && !sender.isBot() && !sender.isServiceAccount() && (useBubbles() ? useBubbleTime() : (!isOutgoing() || hasHeader() || !shouldShowTicks())) && (getViewCount() > 0 || !isEventLog());
   }
 
-  private boolean shouldShowMessageRestrictedWarning () {
-    return BitwiseUtils.hasFlag(flags, FLAG_UNSUPPORTED) || isRestrictedByTelegram();
-  }
-
   private boolean needAvatar () {
     if (!useBubbles()) {
       return true;
@@ -2109,7 +2077,7 @@ public abstract class TGMessage implements InvalidateContentProvider, TdlibDeleg
           hAdminNameT.draw(c, right, top - Screen.dp(12f));
         }
         if (useBubbles && needDrawChannelIconInHeader() && hAuthorNameT != null) {
-          isChannelHeaderCounter.draw(c, (right - Screen.dp(6)), (top - Screen.dp(5)), Gravity.RIGHT | Gravity.BOTTOM, 1f, view, isOutgoing() ? ColorId.bubbleOut_time : ColorId.bubbleIn_time, isChannelHeaderCounterLastDrawRect);
+          isChannelHeaderCounter.draw(c, isChannelHeaderCounterX = (right - Screen.dp(6)), isChannelHeaderCounterY = (top - Screen.dp(5)), Gravity.RIGHT | Gravity.BOTTOM, 1f, view, isOutgoing() ? ColorId.bubbleOut_time : ColorId.bubbleIn_time);
         }
       }
     }
@@ -2129,7 +2097,7 @@ public abstract class TGMessage implements InvalidateContentProvider, TdlibDeleg
       int viewsX = pTicksLeft - Icons.getSingleTickWidth() + ((flags & FLAG_HEADER_ENABLED) != 0 ? 0 : Screen.dp(1f)) - Screen.dp(Icons.TICKS_SHIFT_X);
 
       if (needDrawChannelIconInHeader() && hAuthorNameT != null) {
-        isChannelHeaderCounter.draw(c, ((isSending() ? clockX : viewsX) + Screen.dp(7)), (pTicksTop + Screen.dp(5)), Gravity.LEFT, 1f, view, ColorId.iconLight, isChannelHeaderCounterLastDrawRect);
+        isChannelHeaderCounter.draw(c, isChannelHeaderCounterX = ((isSending() ? clockX : viewsX) + Screen.dp(7)), isChannelHeaderCounterY = (pTicksTop + Screen.dp(5)), Gravity.LEFT, 1f, view, ColorId.iconLight);
         clockX -= isChannelHeaderCounter.getScaledWidth(Screen.dp(1));
         viewsX -= isChannelHeaderCounter.getScaledWidth(Screen.dp(1));
       }
@@ -2151,24 +2119,14 @@ public abstract class TGMessage implements InvalidateContentProvider, TdlibDeleg
 
       // Edited
       if (shouldShowEdited()) {
+        // right -= Icons.getEditedIconWidth();
+        right -= Icons.getEditedIconWidth();
         if (isBeingEdited()) {
-          right -= Icons.getEditedIconWidth();
-          right -= Screen.dp(COUNTER_ADD_MARGIN);
           Drawables.draw(c, Icons.getClockIcon(ColorId.iconLight), pTicksLeft - (shouldShowTicks() ? Icons.getSingleTickWidth() + Screen.dp(2.5f) : 0) - Icons.getEditedIconWidth() - Screen.dp(6f), pTicksTop - Screen.dp(5f), Paints.getIconLightPorterDuffPaint());
         } else {
-          isEdited.draw(c, right, top, Gravity.RIGHT, 1f, view, ColorId.iconLight, isEditedCounterLastDrawRect);
-          right -= isEdited.getScaledWidth(Screen.dp(COUNTER_ICON_MARGIN));
+          Drawables.draw(c, view.getSparseDrawable(R.drawable.baseline_edit_12, ColorId.NONE), right, pTicksTop, Paints.getIconLightPorterDuffPaint());
         }
-      }
-
-      if (shouldShowMessageRestrictedWarning()) {
-        if (isRestrictedByTelegram()) {
-          isRestricted.draw(c, right, top, Gravity.RIGHT, 1f, view, 0, isRestrictedCounterLastDrawRect);
-          right -= isRestricted.getScaledWidth(Screen.dp(COUNTER_ICON_MARGIN));
-        } else {
-          isUnsupported.draw(c, right, top, Gravity.RIGHT, 1f, view, ColorId.iconLight, isRestrictedCounterLastDrawRect);
-          right -= isUnsupported.getScaledWidth(Screen.dp(COUNTER_ICON_MARGIN));
-        }
+        right -= Screen.dp(COUNTER_ADD_MARGIN);
       }
 
       isPinned.draw(c, right, top, Gravity.RIGHT, 1f, view, getTimePartIconColorId());
@@ -2188,7 +2146,8 @@ public abstract class TGMessage implements InvalidateContentProvider, TdlibDeleg
       }
 
       if (translationStyleMode() == Settings.TRANSLATE_MODE_INLINE) {
-        isTranslatedCounter.draw(c, right, top, Gravity.RIGHT, 1f, isTranslatedCounterLastDrawRect);
+        isTranslatedCounter.draw(c, right, isTranslatedCounterY = top, Gravity.RIGHT, 1f);
+        isTranslatedCounterX = right - Screen.dp(10);
         right -= isTranslatedCounter.getScaledWidth(Screen.dp(COUNTER_ICON_MARGIN + COUNTER_ADD_MARGIN));
       }
       if (reactionsDrawMode == REACTIONS_DRAW_MODE_FLAT) {
@@ -2848,35 +2807,16 @@ public abstract class TGMessage implements InvalidateContentProvider, TdlibDeleg
     return e.getY() < findTopEdge();
   }
 
-  private static boolean checkClickOnRect (RectF rectF, float x, float y, float accuracy) {
-    RectF rect = Paints.getRectF();
-    rect.set(rectF);
-    rect.inset(-accuracy, -accuracy);
-    return rect.contains(x, y);
-  }
-
   private int getClickType (MessageView view, float x, float y) {
     if (isTranslated()) {
-      if (checkClickOnRect(isTranslatedCounterLastDrawRect, x, y, Screen.dp(4))) {
+      if (MathUtils.distance(isTranslatedCounterX, isTranslatedCounterY, x, y) < Screen.dp(8)) {
         return CLICK_TYPE_TRANSLATE_MESSAGE_ICON;
       }
     }
 
     if (needDrawChannelIconInHeader() && hAuthorNameT != null) {
-      if (checkClickOnRect(isChannelHeaderCounterLastDrawRect, x, y, Screen.dp(4))) {
+      if (MathUtils.distance(isChannelHeaderCounterX, isChannelHeaderCounterY, x, y) < Screen.dp(8)) {
         return CLICK_TYPE_CHANNEL_MESSAGE_ICON;
-      }
-    }
-
-    if (shouldShowMessageRestrictedWarning()) {
-      if (checkClickOnRect(isRestrictedCounterLastDrawRect, x, y, Screen.dp(4))) {
-        return CLICK_TYPE_MESSAGE_RESTRICTED_ICON;
-      }
-    }
-
-    if (shouldShowEdited()) {
-      if (checkClickOnRect(isEditedCounterLastDrawRect, x, y, Screen.dp(4))) {
-        return CLICK_TYPE_MESSAGE_EDITED_ICON;
       }
     }
 
@@ -2905,28 +2845,6 @@ public abstract class TGMessage implements InvalidateContentProvider, TdlibDeleg
         }
         case CLICK_TYPE_CHANNEL_MESSAGE_ICON: {
           openMessageFromChannel();
-          break;
-        }
-        case CLICK_TYPE_MESSAGE_RESTRICTED_ICON: {
-          showMessageTooltip((targetView, outRect) -> {
-            isRestrictedCounterLastDrawRect.round(outRect);
-            outRect.top -= Screen.dp(6);
-          }, Lang.getString(isRestrictedByTelegram() ?
-            R.string.MessageRestrictedByTelegram :
-            R.string.MessageUnsupportedHint), 2500);
-          break;
-        }
-        case CLICK_TYPE_MESSAGE_EDITED_ICON: {
-          showMessageTooltip((targetView, outRect) -> {
-              isEditedCounterLastDrawRect.round(outRect);
-              outRect.top -= Screen.dp(6);
-            },
-            Lang.getRelativeDate(
-              msg.editDate, TimeUnit.SECONDS,
-              tdlib.currentTimeMillis(), TimeUnit.MILLISECONDS,
-              true, 60, R.string.message_edited, false
-            ),
-            2500);
           break;
         }
         case CLICK_TYPE_REPLY: {
@@ -3014,9 +2932,6 @@ public abstract class TGMessage implements InvalidateContentProvider, TdlibDeleg
   private static final int CLICK_TYPE_AVATAR = 2;
   private static final int CLICK_TYPE_CHANNEL_MESSAGE_ICON = 3;
   private static final int CLICK_TYPE_TRANSLATE_MESSAGE_ICON = 4;
-  private static final int CLICK_TYPE_MESSAGE_RESTRICTED_ICON = 5;
-  private static final int CLICK_TYPE_MESSAGE_EDITED_ICON = 6;
-  private static final int CLICK_TYPE_CHANNEL_MESSAGE_SENDER_ICON = 7;
 
   private int clickType = CLICK_TYPE_NONE;
 
@@ -3381,11 +3296,7 @@ public abstract class TGMessage implements InvalidateContentProvider, TdlibDeleg
     }
 
     if (shouldShowEdited()) {
-      if (isBeingEdited()) {
-        max -= Screen.dp(6f) + Icons.getEditedIconWidth();
-      } else {
-        max -= isEdited.getScaledWidth(Screen.dp(COUNTER_ICON_MARGIN)) + Screen.dp(COUNTER_ADD_MARGIN);
-      }
+      max -= Screen.dp(5f) + Icons.getEditedIconWidth();
     }
 
     String authorName;
@@ -3396,13 +3307,6 @@ public abstract class TGMessage implements InvalidateContentProvider, TdlibDeleg
     }
 
     max -= isPinned.getScaledWidth(Screen.dp(COUNTER_ICON_MARGIN)) + Screen.dp(COUNTER_ADD_MARGIN);
-    if (shouldShowMessageRestrictedWarning()) {
-      if (isRestrictedByTelegram()) {
-        max -= isRestricted.getScaledWidth(Screen.dp(COUNTER_ICON_MARGIN)) + Screen.dp(COUNTER_ADD_MARGIN);
-      } else {
-        max -= isUnsupported.getScaledWidth(Screen.dp(COUNTER_ICON_MARGIN)) + Screen.dp(COUNTER_ADD_MARGIN);
-      }
-    }
     if (replyCounter.getVisibility() > 0f) {
       max -= replyCounter.getScaledWidth(Screen.dp(COUNTER_ICON_MARGIN + COUNTER_ADD_MARGIN));
     }
@@ -3549,12 +3453,6 @@ public abstract class TGMessage implements InvalidateContentProvider, TdlibDeleg
     replyData.setUseColorize(!isOutgoingBubble());
     replyData.setViewProvider(currentViews);
     replyData.load();
-  }
-
-  public void onReplyLoaded () {
-    if (mMessageFilterProcessingState != null) {
-      mMessageFilterProcessingState.setReplySenderId(replyData.getSender());
-    }
   }
 
   @MessageChangeType
@@ -4003,28 +3901,18 @@ public abstract class TGMessage implements InvalidateContentProvider, TdlibDeleg
     isPinned.draw(c, startX, counterY, Gravity.LEFT, 1f, view, iconColorId);
     startX += isPinned.getScaledWidth(Screen.dp(COUNTER_ICON_MARGIN));
 
-    if (shouldShowMessageRestrictedWarning()) {
-      if (isRestrictedByTelegram()) {
-        isRestricted.draw(c, startX, counterY, Gravity.LEFT, 1f, view, 0, isRestrictedCounterLastDrawRect);
-        startX += isRestricted.getScaledWidth(Screen.dp(COUNTER_ICON_MARGIN));
-      } else {
-        isUnsupported.draw(c, startX, counterY, Gravity.LEFT, 1f, view, iconColorId, isRestrictedCounterLastDrawRect);
-        startX += isUnsupported.getScaledWidth(Screen.dp(COUNTER_ICON_MARGIN));
-      }
-    }
-
     if (shouldShowEdited()) {
       if (isBeingEdited()) {
         Drawables.draw(c, Icons.getClockIcon(iconColorId), startX - Screen.dp(6f), startY + Screen.dp(4.5f) - Screen.dp(5f), iconPaint);
-        startX += Icons.getEditedIconWidth() + Screen.dp(3f);
       } else {
-        isEdited.draw(c, startX, counterY, Gravity.LEFT, 1f, view, iconColorId, isEditedCounterLastDrawRect);
-        startX += isEdited.getScaledWidth(Screen.dp(COUNTER_ICON_MARGIN));
+        Drawables.draw(c, view.getSparseDrawable(R.drawable.baseline_edit_12, ColorId.NONE), startX, startY + Screen.dp(4.5f), iconPaint);
       }
+      startX += Icons.getEditedIconWidth() + Screen.dp(2f);
     }
 
     if (translationStyleMode() == Settings.TRANSLATE_MODE_INLINE) {
-      isTranslatedCounter.draw(c, startX, counterY, Gravity.LEFT, 1f, isTranslatedCounterLastDrawRect);
+      isTranslatedCounter.draw(c, startX, isTranslatedCounterY = counterY, Gravity.LEFT, 1f);
+      isTranslatedCounterX = startX + Screen.dp(7);
       startX += isTranslatedCounter.getScaledWidth(Screen.dp(COUNTER_ICON_MARGIN + COUNTER_ADD_MARGIN));
     }
 
@@ -4075,11 +3963,7 @@ public abstract class TGMessage implements InvalidateContentProvider, TdlibDeleg
       width = (int) U.measureText(time, mTimeBubble());
     }
     if (shouldShowEdited()) {
-      if (isBeingEdited()) {
-        width += Icons.getEditedIconWidth() + Screen.dp(2f);
-      } else {
-        width += isEdited.getScaledOrTargetWidth(Screen.dp(COUNTER_ICON_MARGIN), isTarget);
-      }
+      width += Icons.getEditedIconWidth() + Screen.dp(2f);
     }
     if (translationStyleMode() == Settings.TRANSLATE_MODE_INLINE) {
       width += isTranslatedCounter.getScaledOrTargetWidth(Screen.dp(COUNTER_ICON_MARGIN + COUNTER_ADD_MARGIN), isTarget);
@@ -4099,13 +3983,6 @@ public abstract class TGMessage implements InvalidateContentProvider, TdlibDeleg
       width += replyCounter.getScaledOrTargetWidth(Screen.dp(COUNTER_ICON_MARGIN + COUNTER_ADD_MARGIN), isTarget);
     }
     width += isPinned.getScaledOrTargetWidth(Screen.dp(COUNTER_ICON_MARGIN), isTarget);
-    if (shouldShowMessageRestrictedWarning()) {
-      if (isRestrictedByTelegram()) {
-        width += isRestricted.getScaledOrTargetWidth(Screen.dp(COUNTER_ICON_MARGIN), isTarget);
-      } else {
-        width += isUnsupported.getScaledOrTargetWidth(Screen.dp(COUNTER_ICON_MARGIN), isTarget);
-      }
-    }
     if (reactionsDrawMode == REACTIONS_DRAW_MODE_FLAT) {
       width += reactionsCounterDrawable.getMinimumWidth() + messageReactions.getVisibility() * Screen.dp(3);
       width += reactionsCounter.getScaledOrTargetWidth(Screen.dp(COUNTER_ICON_MARGIN + COUNTER_ADD_MARGIN), isTarget);
@@ -4765,9 +4642,6 @@ public abstract class TGMessage implements InvalidateContentProvider, TdlibDeleg
       } else {
         combinedMessages.add(0, message);
       }
-      if (mMessageFilterProcessingState != null) {
-        mMessageFilterProcessingState.combineWith(message);
-      }
       onMessageCombinedWithOtherMessage(message, atBottom, local);
       forceCancelGlobalAnimation(true);
     }
@@ -5204,20 +5078,6 @@ public abstract class TGMessage implements InvalidateContentProvider, TdlibDeleg
       }
     }
     return false;
-  }
-
-  public boolean isRestrictedByTelegram () {
-    synchronized (this) {
-      if (combinedMessages != null) {
-        for (TdApi.Message message : combinedMessages) {
-          if (!StringUtils.isEmpty(message.restrictionReason)) {
-            return true;
-          }
-        }
-      }
-    }
-
-    return !StringUtils.isEmpty(msg.restrictionReason);
   }
 
   protected boolean replaceTimeWithEditTime () {
@@ -8026,9 +7886,7 @@ public abstract class TGMessage implements InvalidateContentProvider, TdlibDeleg
         return new TGMessageText(context, msg, new TdApi.FormattedText(Lang.getString(R.string.DeletedMessage), null));
       }
       if (!StringUtils.isEmpty(msg.restrictionReason) && Settings.instance().needRestrictContent()) {
-        TGMessageText text = new TGMessageText(context, msg, new TdApi.FormattedText(msg.restrictionReason, new TdApi.TextEntity[]{
-          new TdApi.TextEntity(0, msg.restrictionReason.length(), new TdApi.TextEntityTypeItalic())
-        }));
+        TGMessageText text = new TGMessageText(context, msg, new TdApi.FormattedText(msg.restrictionReason, null));
         text.addMessageFlags(FLAG_UNSUPPORTED);
         return text;
       }
@@ -8249,10 +8107,7 @@ public abstract class TGMessage implements InvalidateContentProvider, TdlibDeleg
           throw Td.unsupported(msg.content);
         }
       }
-      String unsupportedText = Lang.getString(unsupportedStringRes);
-      TGMessageText text = new TGMessageText(context, msg, new TdApi.FormattedText(unsupportedText, new TdApi.TextEntity[]{
-        new TdApi.TextEntity(0, unsupportedText.length(), new TdApi.TextEntityTypeItalic())
-      }));
+      TGMessageText text = new TGMessageText(context, msg, new TdApi.FormattedText(Lang.getString(unsupportedStringRes), null));
       text.addMessageFlags(FLAG_UNSUPPORTED);
       return text;
     } catch (Throwable t) {
@@ -9182,7 +9037,12 @@ public abstract class TGMessage implements InvalidateContentProvider, TdlibDeleg
   }
 
   private boolean openMessageFromChannel () {
-    TooltipOverlayView.TooltipBuilder tooltipBuilder = context().tooltipManager().builder(findCurrentView()).locate((targetView, outRect) -> isChannelHeaderCounterLastDrawRect.round(outRect));
+    TooltipOverlayView.TooltipBuilder tooltipBuilder = context().tooltipManager().builder(findCurrentView()).locate((targetView, outRect) -> {
+      outRect.left = (int) (isChannelHeaderCounterX - Screen.dp(7));
+      outRect.top = (int) (isChannelHeaderCounterY - Screen.dp(7));
+      outRect.right = (int) (isChannelHeaderCounterX + Screen.dp(7));
+      outRect.bottom = (int) (isChannelHeaderCounterY + Screen.dp(7));
+    });
 
     tdlib().ui().openChat(this, sender.getChatId(), new TdlibUi.ChatOpenParameters()
       .urlOpenParameters(new TdlibUi.UrlOpenParameters().tooltip(tooltipBuilder)).keepStack()
@@ -9197,21 +9057,24 @@ public abstract class TGMessage implements InvalidateContentProvider, TdlibDeleg
   private TooltipOverlayView.TooltipInfo languageSelectorTooltip;
 
   private void openLanguageSelectorInlineMode () {
-    TooltipOverlayView.TooltipBuilder tooltipBuilder = context().tooltipManager().builder(findCurrentView())
-      .locate((targetView, outRect) -> isTranslatedCounterLastDrawRect.round(outRect));
+    TooltipOverlayView.TooltipBuilder tooltipBuilder = context().tooltipManager().builder(findCurrentView()).locate((targetView, outRect) -> {
+      outRect.left = (int) (isTranslatedCounterX - Screen.dp(7));
+      outRect.top = (int) (isTranslatedCounterY - Screen.dp(7));
+      outRect.right = (int) (isTranslatedCounterX + Screen.dp(7));
+      outRect.bottom = (int) (isTranslatedCounterY + Screen.dp(7));
+    });
 
     languageSelectorTooltip = tooltipBuilder.show(this, this::showLanguageSelectorInlineMode);//.hideDelayed(3500, TimeUnit.MILLISECONDS);
   }
 
   private void showTranslateErrorMessageBubbleMode (String message) {
-    TooltipOverlayView.TooltipBuilder tooltipBuilder = context().tooltipManager().builder(findCurrentView())
-      .locate((targetView, outRect) -> isTranslatedCounterLastDrawRect.round(outRect));
+    TooltipOverlayView.TooltipBuilder tooltipBuilder = context().tooltipManager().builder(findCurrentView()).locate((targetView, outRect) -> {
+      outRect.left = (int) (isTranslatedCounterX - Screen.dp(7));
+      outRect.top = (int) (isTranslatedCounterY - Screen.dp(7));
+      outRect.right = (int) (isTranslatedCounterX + Screen.dp(7));
+      outRect.bottom = (int) (isTranslatedCounterY + Screen.dp(7));
+    });
     languageSelectorTooltip = tooltipBuilder.show(tdlib, message).hideDelayed(3500, TimeUnit.MILLISECONDS);
-  }
-
-  private TooltipOverlayView.TooltipInfo showMessageTooltip (TooltipOverlayView.LocationProvider locate, String message, long msDuration) {
-    TooltipOverlayView.TooltipBuilder tooltipBuilder = context().tooltipManager().builder(findCurrentView()).locate(locate);
-    return tooltipBuilder.show(tdlib, message).hideDelayed(msDuration, TimeUnit.MILLISECONDS);
   }
 
   private void showLanguageSelectorInlineMode (View v) {
@@ -9340,9 +9203,12 @@ public abstract class TGMessage implements InvalidateContentProvider, TdlibDeleg
   private void checkSelectLanguageWarning (boolean force) {
     String current = mTranslationsManager.getCurrentTranslatedLanguage();
     if (current == null || StringUtils.equalsOrBothEmpty(current, getOriginalMessageLanguage()) || force) {
-      context().tooltipManager().builder(findCurrentView())
-        .locate((targetView, outRect) -> isTranslatedCounterLastDrawRect.round(outRect))
-        .show(tdlib, Lang.getString(R.string.TapToSelectLanguage)).hideDelayed(3500, TimeUnit.MILLISECONDS);;
+      context().tooltipManager().builder(findCurrentView()).locate((targetView, outRect) -> {
+        outRect.left = (int) (isTranslatedCounterX - Screen.dp(7));
+        outRect.top = (int) (isTranslatedCounterY - Screen.dp(7));
+        outRect.right = (int) (isTranslatedCounterX + Screen.dp(7));
+        outRect.bottom = (int) (isTranslatedCounterY + Screen.dp(7));
+      }).show(tdlib, Lang.getString(R.string.TapToSelectLanguage)).hideDelayed(3500, TimeUnit.MILLISECONDS);;
     }
   }
 

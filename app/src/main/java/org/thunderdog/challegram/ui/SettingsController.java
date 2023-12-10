@@ -43,6 +43,7 @@ import org.thunderdog.challegram.data.TGMessage;
 import org.thunderdog.challegram.data.TGStickerSetInfo;
 import org.thunderdog.challegram.loader.AvatarReceiver;
 import org.thunderdog.challegram.loader.ImageGalleryFile;
+import org.thunderdog.challegram.mediaview.MediaViewController;
 import org.thunderdog.challegram.navigation.ActivityResultHandler;
 import org.thunderdog.challegram.navigation.BackHeaderButton;
 import org.thunderdog.challegram.navigation.ComplexHeaderView;
@@ -98,15 +99,12 @@ public class SettingsController extends ViewController<Void> implements
   Menu, MoreDelegate, OptionDelegate,
   TdlibCache.MyUserDataChangeListener, ConnectionListener, StickersListener, MediaLayout.MediaGalleryCallback,
   ActivityResultHandler, View.OnLongClickListener, SessionListener, GlobalTokenStateListener {
-
-  private final TdlibUi.AvatarPickerManager avatarPickerManager;
   private ComplexHeaderView headerCell;
   private ComplexRecyclerView contentView;
   private SettingsAdapter adapter;
 
   public SettingsController (Context context, Tdlib tdlib) {
     super(context, tdlib);
-    avatarPickerManager = new TdlibUi.AvatarPickerManager(this);
   }
 
   @Override
@@ -250,12 +248,56 @@ public class SettingsController extends ViewController<Void> implements
   }
 
   private void changeProfilePhoto () {
-    avatarPickerManager.showMenuForProfile(headerCell, false);
+    IntList ids = new IntList(4);
+    StringList strings = new StringList(4);
+    IntList colors = new IntList(4);
+    IntList icons = new IntList(4);
+
+    final TdApi.User user = tdlib.myUser();
+    if (user != null && user.profilePhoto != null) {
+      ids.append(R.id.btn_open);
+      strings.append(R.string.Open);
+      icons.append(R.drawable.baseline_visibility_24);
+      colors.append(OPTION_COLOR_NORMAL);
+    }
+
+    ids.append(R.id.btn_changePhotoCamera);
+    strings.append(R.string.ChatCamera);
+    icons.append(R.drawable.baseline_camera_alt_24);
+    colors.append(OPTION_COLOR_NORMAL);
+
+    ids.append(R.id.btn_changePhotoGallery);
+    strings.append(R.string.Gallery);
+    icons.append(R.drawable.baseline_image_24);
+    colors.append(OPTION_COLOR_NORMAL);
+
+    final long profilePhotoToDelete = user != null && user.profilePhoto != null ? user.profilePhoto.id : 0;
+    if (user != null && user.profilePhoto != null) {
+      ids.append(R.id.btn_changePhotoDelete);
+      strings.append(R.string.Delete);
+      icons.append(R.drawable.baseline_delete_24);
+      colors.append(OPTION_COLOR_RED);
+    }
+
+    showOptions(null, ids.get(), strings.get(), colors.get(), icons.get(), (itemView, id) -> {
+      if (id == R.id.btn_open) {
+        MediaViewController.openFromProfile(SettingsController.this, user, headerCell);
+      } else if (id == R.id.btn_changePhotoCamera) {
+        UI.openCameraDelayed(context);
+      } else if (id == R.id.btn_changePhotoGallery) {
+        UI.openGalleryDelayed(context, false);
+      } else if (id == R.id.btn_changePhotoDelete) {
+        tdlib.client().send(new TdApi.DeleteProfilePhoto(profilePhotoToDelete), tdlib.okHandler());
+      }
+      return true;
+    });
   }
 
   @Override
   public void onActivityResult (int requestCode, int resultCode, Intent data) {
-    avatarPickerManager.handleActivityResult(requestCode, resultCode, data, TdlibUi.AvatarPickerManager.MODE_PROFILE, null, null);
+    if (resultCode == Activity.RESULT_OK) {
+      tdlib.ui().handlePhotoChange(requestCode, data, null);
+    }
   }
 
   private boolean hasNotificationError;
