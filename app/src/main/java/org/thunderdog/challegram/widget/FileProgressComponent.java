@@ -783,6 +783,9 @@ public class FileProgressComponent implements TdlibFilesManager.FileListener, Fa
       }
       case TdlibFilesManager.STATE_IN_PROGRESS: {
         if (file != null) {
+          if (tdlib.cancelEditMessageMedia(chatId, messageId)) {
+            return true;
+          }
           if (file.remote.isUploadingActive || isSendingMessage) {
             tdlib.deleteMessagesIfOk(chatId, new long[] {messageId}, true);
           } else {

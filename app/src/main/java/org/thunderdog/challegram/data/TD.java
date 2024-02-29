@@ -64,7 +64,10 @@ import org.thunderdog.challegram.core.Lang;
 import org.thunderdog.challegram.emoji.CustomEmojiId;
 import org.thunderdog.challegram.emoji.EmojiSpan;
 import org.thunderdog.challegram.filegen.GenerationInfo;
+import org.thunderdog.challegram.filegen.PhotoGenerationInfo;
+import org.thunderdog.challegram.filegen.VideoGenerationInfo;
 import org.thunderdog.challegram.loader.ImageFile;
+import org.thunderdog.challegram.loader.ImageGalleryFile;
 import org.thunderdog.challegram.loader.gif.GifFile;
 import org.thunderdog.challegram.navigation.ViewController;
 import org.thunderdog.challegram.telegram.PrivacySettings;
@@ -5544,5 +5547,277 @@ public class TD {
 
     TdApi.PremiumGiveawayInfoOngoing infoOngoing = (TdApi.PremiumGiveawayInfoOngoing) info;
     return infoOngoing.status.getConstructor() == TdApi.PremiumGiveawayParticipantStatusParticipating.CONSTRUCTOR;
+  }
+
+  public static TdApi.FormattedText textOrCaption (TdApi.InputMessageContent inputMessageContent) {
+    if (inputMessageContent == null) {
+      return null;
+    }
+
+    switch (inputMessageContent.getConstructor()) {
+      case TdApi.InputMessageText.CONSTRUCTOR:
+        return ((TdApi.InputMessageText) inputMessageContent).text;
+      case TdApi.InputMessagePhoto.CONSTRUCTOR:
+        return ((TdApi.InputMessagePhoto) inputMessageContent).caption;
+      case TdApi.InputMessageVideo.CONSTRUCTOR:
+        return ((TdApi.InputMessageVideo) inputMessageContent).caption;
+      default:
+        return null; // todo
+    }
+  }
+
+  public static TdApi.InputFile getInputFile (TdApi.InputMessageContent content) {
+    switch (content.getConstructor()) {
+      case TdApi.InputMessagePhoto.CONSTRUCTOR:
+        return ((TdApi.InputMessagePhoto) content).photo;
+      case TdApi.InputMessageVideo.CONSTRUCTOR:
+        return ((TdApi.InputMessageVideo) content).video;
+      case TdApi.InputMessageDocument.CONSTRUCTOR:
+        return ((TdApi.InputMessageDocument) content).document;
+      case TdApi.InputMessageAnimation.CONSTRUCTOR:
+        return ((TdApi.InputMessageAnimation) content).animation;
+      case TdApi.InputMessageAudio.CONSTRUCTOR:
+        return ((TdApi.InputMessageAudio) content).audio;
+      case TdApi.InputMessageSticker.CONSTRUCTOR:
+        return ((TdApi.InputMessageSticker) content).sticker;
+      case TdApi.InputMessageVideoNote.CONSTRUCTOR:
+        return ((TdApi.InputMessageVideoNote) content).videoNote;
+      case TdApi.InputMessageVoiceNote.CONSTRUCTOR:
+        return ((TdApi.InputMessageVoiceNote) content).voiceNote;
+      case TdApi.InputMessageLocation.CONSTRUCTOR:
+      case TdApi.InputMessageContact.CONSTRUCTOR:
+      case TdApi.InputMessageDice.CONSTRUCTOR:
+      case TdApi.InputMessageGame.CONSTRUCTOR:
+      case TdApi.InputMessageInvoice.CONSTRUCTOR:
+      case TdApi.InputMessagePoll.CONSTRUCTOR:
+      case TdApi.InputMessageStory.CONSTRUCTOR:
+      case TdApi.InputMessageVenue.CONSTRUCTOR:
+      case TdApi.InputMessageForwarded.CONSTRUCTOR:
+      case TdApi.InputMessageText.CONSTRUCTOR:
+        return null;
+      default:
+        Td.assertInputMessageContent_4e99a3f();
+        throw Td.unsupported(content);
+    }
+  }
+
+  public static TdApi.FileType toFileType (TdApi.InputMessageContent content) {
+    switch (content.getConstructor()) {
+      case TdApi.InputMessagePhoto.CONSTRUCTOR:
+        return new TdApi.FileTypePhoto();
+      case TdApi.InputMessageVideo.CONSTRUCTOR:
+        return new TdApi.FileTypeVideo();
+      case TdApi.InputMessageDocument.CONSTRUCTOR:
+        return new TdApi.FileTypeDocument();
+      case TdApi.InputMessageAnimation.CONSTRUCTOR:
+        return new TdApi.FileTypeAnimation();
+      case TdApi.InputMessageAudio.CONSTRUCTOR:
+        return new TdApi.FileTypeAudio();
+      case TdApi.InputMessageSticker.CONSTRUCTOR:
+        return new TdApi.FileTypeSticker();
+      case TdApi.InputMessageVideoNote.CONSTRUCTOR:
+        return new TdApi.FileTypeVideoNote();
+      case TdApi.InputMessageVoiceNote.CONSTRUCTOR:
+        return new TdApi.FileTypeVoiceNote();
+      case TdApi.InputMessageLocation.CONSTRUCTOR:
+      case TdApi.InputMessageContact.CONSTRUCTOR:
+      case TdApi.InputMessageDice.CONSTRUCTOR:
+      case TdApi.InputMessageGame.CONSTRUCTOR:
+      case TdApi.InputMessageInvoice.CONSTRUCTOR:
+      case TdApi.InputMessagePoll.CONSTRUCTOR:
+      case TdApi.InputMessageStory.CONSTRUCTOR:
+      case TdApi.InputMessageVenue.CONSTRUCTOR:
+      case TdApi.InputMessageForwarded.CONSTRUCTOR:
+      case TdApi.InputMessageText.CONSTRUCTOR:
+        return null;
+      default:
+        Td.assertInputMessageContent_4e99a3f();
+        throw Td.unsupported(content);
+    }
+  }
+
+  public static void setInputFile (TdApi.InputMessageContent content, TdApi.InputFile inputFile) {
+    switch (content.getConstructor()) {
+      case TdApi.InputMessagePhoto.CONSTRUCTOR:
+        ((TdApi.InputMessagePhoto) content).photo = inputFile;
+        return;
+      case TdApi.InputMessageVideo.CONSTRUCTOR:
+        ((TdApi.InputMessageVideo) content).video = inputFile;
+        return;
+      case TdApi.InputMessageDocument.CONSTRUCTOR:
+        ((TdApi.InputMessageDocument) content).document = inputFile;
+        return;
+      case TdApi.InputMessageAnimation.CONSTRUCTOR:
+        ((TdApi.InputMessageAnimation) content).animation = inputFile;
+        return;
+      case TdApi.InputMessageAudio.CONSTRUCTOR:
+        ((TdApi.InputMessageAudio) content).audio = inputFile;
+        return;
+      case TdApi.InputMessageSticker.CONSTRUCTOR:
+        ((TdApi.InputMessageSticker) content).sticker = inputFile;
+        return;
+      case TdApi.InputMessageVideoNote.CONSTRUCTOR:
+        ((TdApi.InputMessageVideoNote) content).videoNote = inputFile;
+        return;
+      case TdApi.InputMessageVoiceNote.CONSTRUCTOR:
+        ((TdApi.InputMessageVoiceNote) content).voiceNote = inputFile;
+        return;
+      case TdApi.InputMessageLocation.CONSTRUCTOR:
+      case TdApi.InputMessageContact.CONSTRUCTOR:
+      case TdApi.InputMessageDice.CONSTRUCTOR:
+      case TdApi.InputMessageGame.CONSTRUCTOR:
+      case TdApi.InputMessageInvoice.CONSTRUCTOR:
+      case TdApi.InputMessagePoll.CONSTRUCTOR:
+      case TdApi.InputMessageStory.CONSTRUCTOR:
+      case TdApi.InputMessageVenue.CONSTRUCTOR:
+      case TdApi.InputMessageForwarded.CONSTRUCTOR:
+      case TdApi.InputMessageText.CONSTRUCTOR:
+        return;
+      default:
+        Td.assertInputMessageContent_4e99a3f();
+        throw Td.unsupported(content);
+    }
+  }
+
+  public static TdApi.InputThumbnail getInputThumbnail (TdApi.InputMessageContent content) {
+    switch (content.getConstructor()) {
+      case TdApi.InputMessagePhoto.CONSTRUCTOR:
+        return ((TdApi.InputMessagePhoto) content).thumbnail;
+      case TdApi.InputMessageVideo.CONSTRUCTOR:
+        return ((TdApi.InputMessageVideo) content).thumbnail;
+      case TdApi.InputMessageDocument.CONSTRUCTOR:
+        return ((TdApi.InputMessageDocument) content).thumbnail;
+      case TdApi.InputMessageAnimation.CONSTRUCTOR:
+        return ((TdApi.InputMessageAnimation) content).thumbnail;
+      case TdApi.InputMessageAudio.CONSTRUCTOR:
+        return ((TdApi.InputMessageAudio) content).albumCoverThumbnail;
+      case TdApi.InputMessageSticker.CONSTRUCTOR:
+        return ((TdApi.InputMessageSticker) content).thumbnail;
+      case TdApi.InputMessageVideoNote.CONSTRUCTOR:
+        return ((TdApi.InputMessageVideoNote) content).thumbnail;
+      case TdApi.InputMessageVoiceNote.CONSTRUCTOR:
+      case TdApi.InputMessageLocation.CONSTRUCTOR:
+      case TdApi.InputMessageContact.CONSTRUCTOR:
+      case TdApi.InputMessageDice.CONSTRUCTOR:
+      case TdApi.InputMessageGame.CONSTRUCTOR:
+      case TdApi.InputMessageInvoice.CONSTRUCTOR:
+      case TdApi.InputMessagePoll.CONSTRUCTOR:
+      case TdApi.InputMessageStory.CONSTRUCTOR:
+      case TdApi.InputMessageVenue.CONSTRUCTOR:
+      case TdApi.InputMessageForwarded.CONSTRUCTOR:
+      case TdApi.InputMessageText.CONSTRUCTOR:
+        return null;
+      default:
+        Td.assertInputMessageContent_4e99a3f();
+        throw Td.unsupported(content);
+    }
+  }
+
+  public static TdApi.InputFile getInputFileThumbnail (TdApi.InputMessageContent content) {
+    final TdApi.InputThumbnail inputThumbnail = getInputThumbnail(content);
+    return inputThumbnail != null ? inputThumbnail.thumbnail : null;
+  }
+
+  public static void setInputFileThumbnail (TdApi.InputMessageContent content, TdApi.InputFile inputFile) {
+    final TdApi.InputThumbnail inputThumbnail = getInputThumbnail(content);
+    if (inputThumbnail != null) {
+      inputThumbnail.thumbnail = inputFile;
+    }
+  }
+
+
+
+  public static TdApi.InputFile getInputFile (ImageGalleryFile file, boolean asFiles) {
+    if (file.isVideo()) {
+      if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.JELLY_BEAN_MR1) {
+        MediaMetadataRetriever retriever = null;
+        try {
+          retriever = U.openRetriever(file.getFilePath());
+          String rotation = retriever.extractMetadata(MediaMetadataRetriever.METADATA_KEY_VIDEO_ROTATION);
+          if (StringUtils.isNumeric(rotation)) {
+            file.setRotation(StringUtils.parseInt(rotation));
+          }
+        } catch (Throwable ignored) {}
+        U.closeRetriever(retriever);
+      }
+
+      return (Config.USE_VIDEO_COMPRESSION && !(asFiles && VideoGenerationInfo.isEmpty(file))) ?
+        VideoGenerationInfo.newFile(file.getFilePath(), file, asFiles) :
+        TD.createInputFile(file.getFilePath());
+    } else {
+      return (asFiles && PhotoGenerationInfo.isEmpty(file)) ?
+        TD.createInputFile(file.getFilePath()) :
+        PhotoGenerationInfo.newFile(file);
+    }
+  }
+
+
+  public static TdApi.InputMessageContent toContent (Tdlib tdlib, ImageGalleryFile file, boolean asFiles, boolean disableMarkdown, boolean hasSpoiler, boolean isSecretChat) {
+    if (file.getSelfDestructType() != null && asFiles)
+      throw new IllegalArgumentException();
+    TdApi.InputMessageContent content;
+    if (file.isVideo()) {
+      boolean sendAsAnimation = file.shouldMuteVideo();
+      if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.JELLY_BEAN_MR1) {
+        MediaMetadataRetriever retriever = null;
+        try {
+          retriever = U.openRetriever(file.getFilePath());
+          if (!sendAsAnimation) {
+            String hasAudioStr = retriever.extractMetadata(MediaMetadataRetriever.METADATA_KEY_HAS_AUDIO);
+            if (StringUtils.isEmpty(hasAudioStr) || !StringUtils.equalsOrBothEmpty(hasAudioStr.toLowerCase(), "yes")) {
+              sendAsAnimation = true;
+            }
+          }
+          String rotation = retriever.extractMetadata(MediaMetadataRetriever.METADATA_KEY_VIDEO_ROTATION);
+          if (StringUtils.isNumeric(rotation)) {
+            file.setRotation(StringUtils.parseInt(rotation));
+          }
+        } catch (Throwable ignored) {
+          // Doing nothing
+        }
+        U.closeRetriever(retriever);
+      }
+
+      int[] size = new int[2];
+      file.getOutputSize(size);
+
+      final int width = size[0];
+      final int height = size[1];
+
+      final TD.FileInfo fileInfo = new TD.FileInfo();
+      boolean forceVideo = Config.USE_VIDEO_COMPRESSION && !(asFiles && VideoGenerationInfo.isEmpty(file));
+      final TdApi.InputFile inputVideo = forceVideo ? VideoGenerationInfo.newFile(file.getFilePath(), file, asFiles) : TD.createInputFile(file.getFilePath(), null, fileInfo);
+      TdApi.FormattedText caption = file.getCaption(true, !disableMarkdown);
+      if (asFiles && !forceVideo) {
+        content = tdlib.filegen().createThumbnail(TD.toInputMessageContent(file.getFilePath(), inputVideo, fileInfo, caption, hasSpoiler), isSecretChat);
+      } else /*if (sendAsAnimation && file.getSelfDestructType() == null && (files.length == 1 || !needGroupMedia)) {
+        content = tdlib.filegen().createThumbnail(new TdApi.InputMessageAnimation(inputVideo, null, null, file.getVideoDuration(true), width, height, caption, hasSpoiler), isSecretChat);
+      } else*/ {
+        content = tdlib.filegen().createThumbnail(new TdApi.InputMessageVideo(inputVideo, null, null, file.getVideoDuration(true), width, height, U.canStreamVideo(inputVideo), caption, file.getSelfDestructType(), hasSpoiler), isSecretChat);
+      }
+    } else {
+      int[] size = new int[2];
+      file.getOutputSize(size);
+
+      final int width = size[0];
+      final int height = size[1];
+
+      final TdApi.InputFile inputFile;
+      if (asFiles && PhotoGenerationInfo.isEmpty(file)) {
+        inputFile = TD.createInputFile(file.getFilePath());
+      } else {
+        inputFile = PhotoGenerationInfo.newFile(file);
+      }
+
+      TdApi.FormattedText caption = file.getCaption(true, !disableMarkdown);
+
+      if (asFiles) {
+        content = tdlib.filegen().createThumbnail(new TdApi.InputMessageDocument(inputFile, null, false, caption), isSecretChat);
+      } else {
+        content = tdlib.filegen().createThumbnail(new TdApi.InputMessagePhoto(inputFile, null, null, width, height, caption, file.getSelfDestructType(), hasSpoiler), isSecretChat);
+      }
+    }
+
+    return content;
   }
 }

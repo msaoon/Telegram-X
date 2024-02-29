@@ -450,6 +450,7 @@ public class Tdlib implements TdlibProvider, Settings.SettingsChangeListener, Da
   private final TdlibNotificationManager notificationManager;
   private final TdlibFileGenerationManager fileGenerationManager;
   private final TdlibSingleUnreadReactionsManager unreadReactionsManager;
+  private final TdlibEditMediaManager editMediaManager;
   private final TdlibMessageViewer messageViewer;
 
   private final HashSet<Long> channels = new HashSet<>();
@@ -655,6 +656,7 @@ public class Tdlib implements TdlibProvider, Settings.SettingsChangeListener, Da
       ms = SystemClock.uptimeMillis();
     }
     this.unreadReactionsManager = new TdlibSingleUnreadReactionsManager(this);
+    this.editMediaManager = new TdlibEditMediaManager(this);
     this.applicationConfigJson = settings().getApplicationConfig();
     if (!StringUtils.isEmpty(applicationConfigJson)) {
       TdApi.JsonValue value = JSON.parse(applicationConfigJson);
@@ -4723,6 +4725,11 @@ public class Tdlib implements TdlibProvider, Settings.SettingsChangeListener, Da
   private final HashMap<String, TdApi.MessageContent> pendingMessageTexts = new HashMap<>();
   private final HashMap<String, TdApi.FormattedText> pendingMessageCaptions = new HashMap<>();
 
+  public boolean canEditMedia (TdApi.Message message) {
+    return message != null && message.canBeEdited && message.content != null && (Td.isPhoto(message.content) || message.content.getConstructor() == TdApi.MessageVideo.CONSTRUCTOR);
+  }
+
+
   public void editMessageText (long chatId, long messageId, TdApi.InputMessageText content, @Nullable TdApi.WebPage webPage) {
     if (content.linkPreviewOptions != null && content.linkPreviewOptions.isDisabled) {
       webPage = null;
@@ -4772,6 +4779,14 @@ public class Tdlib implements TdlibProvider, Settings.SettingsChangeListener, Da
     performEdit(chatId, messageId, caption, new TdApi.EditMessageCaption(chatId, messageId, null, caption), pendingMessageCaptions);
   }
 
+  public boolean cancelEditMessageMedia (long chatId, long messageId) {
+    return editMediaManager.editMediaCancel(chatId, messageId);
+  }
+
+  public void editMessageMedia (long chatId, long messageId, TdApi.InputMessageContent content, @Nullable ImageFile preview) {
+    editMediaManager.editMediaStart(chatId, messageId, content, preview);
+  }
+
   public TdApi.FormattedText getFormattedText (TdApi.Message message) {
     if (message == null)
       return null;
@@ -4794,6 +4809,11 @@ public class Tdlib implements TdlibProvider, Settings.SettingsChangeListener, Da
       Td.assertMessageContent_4113f183();
       throw Td.unsupported(messageText);
     }
+    MessageEditMediaPending pendingEditMedia = getPendingMessageMedia(chatId, messageId);
+    if (pendingEditMedia != null) {
+      return TD.textOrCaption(pendingEditMedia.content);
+    }
+
     return getPendingMessageCaption(chatId, messageId);
   }
 
@@ -4807,6 +4827,10 @@ public class Tdlib implements TdlibProvider, Settings.SettingsChangeListener, Da
     synchronized (pendingMessageCaptions) {
       return pendingMessageCaptions.get(chatId + "_" + messageId);
     }
+  }
+
+  public MessageEditMediaPending getPendingMessageMedia (long chatId, long messageId) {
+    return editMediaManager.getPendingMessageMedia(chatId, messageId);
   }
 
   private <T extends TdApi.Object> void performEdit (long chatId, long messageId, T pendingData, TdApi.Function<?> function, Map<String, T> map) {

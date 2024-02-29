@@ -767,6 +767,8 @@
   <string name="GroupPhoto">Group photo</string>
   <string name="ChannelPhoto">Channel photo</string>
   <string name="ShowInChat">Show in Chat</string>
+  <string name="ReplaceImage">Replace Image</string>
+  <string name="ReplaceVideo">Replace Video</string>
   <string name="ShowInDiscussionGroup">Show in discussion group</string>
   <string name="GroupIsFull">The group you tried to join is full</string>
   <string name="PasswordIsInvalid">The password you have entered is invalid</string>
@@ -4818,6 +4820,7 @@
 
   <string name="MediaSpoilerHint">Media will be blurred inside the chat and reveal after additional tap.</string>
   <string name="HideMedia">Hide media</string>
+  <string name="MediaHapticForward">Forward</string>
 
   <string name="ShowXMoreStickers_one">show %1$s more</string>
   <string name="ShowXMoreStickers_other">show %1$s more</string>

@@ -46,6 +46,7 @@ import org.thunderdog.challegram.data.TGUser;
 import org.thunderdog.challegram.loader.ImageFile;
 import org.thunderdog.challegram.loader.ImageGalleryFile;
 import org.thunderdog.challegram.mediaview.AvatarPickerMode;
+import org.thunderdog.challegram.mediaview.MediaViewController;
 import org.thunderdog.challegram.navigation.ActivityResultHandler;
 import org.thunderdog.challegram.navigation.BackHeaderButton;
 import org.thunderdog.challegram.navigation.BackListener;
@@ -90,6 +91,7 @@ import me.vkryl.android.animator.FactorAnimator;
 import me.vkryl.android.widget.FrameLayoutFix;
 import me.vkryl.core.ColorUtils;
 import me.vkryl.core.lambda.Destroyable;
+import me.vkryl.core.lambda.RunnableData;
 import me.vkryl.td.Td;
 import me.vkryl.td.TdConstants;
 
@@ -153,6 +155,16 @@ public class MediaLayout extends FrameLayoutFix implements
 
   public int getAvatarPickerMode () {
     return avatarPickerMode;
+  }
+
+  private boolean singleMediaMode;
+
+  public void setSingleMediaMode (boolean singleMediaMode) {
+    this.singleMediaMode = singleMediaMode;
+  }
+
+  public boolean inSingleMediaMode () {
+    return singleMediaMode || avatarPickerMode != AvatarPickerMode.NONE || mode == MODE_AVATAR_PICKER;
   }
 
   public void setAvatarPickerMode (@AvatarPickerMode int avatarPickerMode) {
@@ -400,7 +412,7 @@ public class MediaLayout extends FrameLayoutFix implements
       case MODE_AVATAR_PICKER:
       case MODE_GALLERY: {
         MediaBottomGalleryController c = new MediaBottomGalleryController(this);
-        c.setArguments(new MediaBottomGalleryController.Arguments(mode == MODE_GALLERY));
+        c.setArguments(new MediaBottomGalleryController.Arguments(mode == MODE_GALLERY || (mode == MODE_AVATAR_PICKER && avatarPickerMode == AvatarPickerMode.NONE)));
         return c;
       }
     }
@@ -421,6 +433,16 @@ public class MediaLayout extends FrameLayoutFix implements
     return bottomBar != null ? controllers[bottomBar.getCurrentIndex()] : controllers[0];
   }
 
+  private boolean disallowGallerySystemPicker;
+
+  public void setDisallowGallerySystemPicker (boolean disallowGallerySystemPicker) {
+    this.disallowGallerySystemPicker = disallowGallerySystemPicker;
+  }
+
+  public boolean isDisallowGallerySystemPicker () {
+    return disallowGallerySystemPicker;
+  }
+
   // Setters
 
   public void setNoMediaAccess () {
@@ -436,12 +458,17 @@ public class MediaLayout extends FrameLayoutFix implements
   private PopupLayout popupLayout;
 
   public void show () {
+    show(false);
+  }
+
+  public void show (boolean overlayStatusBar) {
     popupLayout = new PopupLayout(getContext());
     popupLayout.setTouchDownInterceptor(this);
     popupLayout.setActivityListener(this);
     popupLayout.setHideKeyboard();
     popupLayout.setDismissListener(this);
     popupLayout.setNeedRootInsets();
+    popupLayout.setOverlayStatusBar(overlayStatusBar);
     popupLayout.init(true);
     popupLayout.showAnimatedPopupView(this, this);
   }
@@ -678,6 +705,24 @@ public class MediaLayout extends FrameLayoutFix implements
     addView(toView, 1);
 
     return true;
+  }
+
+  public interface MediaViewArgumentsEditor {
+    MediaViewController.Args edit (MediaViewController.Args args);
+  }
+
+  private MediaViewArgumentsEditor mediaViewControllerArgumentsEditor;
+
+  public void setMediaViewControllerArgumentsEditor (MediaViewArgumentsEditor mediaViewControllerArgumentsEditor) {
+    this.mediaViewControllerArgumentsEditor = mediaViewControllerArgumentsEditor;
+  }
+
+  public MediaViewController.Args prepareMediaViewArguments (MediaViewController.Args args) {
+    if (mediaViewControllerArgumentsEditor != null) {
+      return mediaViewControllerArgumentsEditor.edit(args);
+    }
+
+    return args;
   }
 
   @Override
@@ -1724,7 +1769,7 @@ public class MediaLayout extends FrameLayoutFix implements
   }
 
   public void setCounter (int count) {
-    if (mode == MODE_AVATAR_PICKER) {
+    if (inSingleMediaMode()) {
       return;
     }
 
