@@ -147,12 +147,16 @@ public class TdlibEditMediaManager implements MessageEditMediaUploadCallback {
           listener.onFail(id, false);
           return;
         }
+        final boolean isUploaded = TD.isFileUploaded(file);
+        if (!isUploaded) {
+          tdlib.files().subscribe(file, this);
+        }
         UI.post(() -> {
           if (isCanceled) {
             return;
           }
 
-          if (TD.isFileUploaded(file)) {
+          if (isUploaded) {
             onUpdateFileImpl(file);
             this.isCompleted = true;
             this.listener.onComplete(id, file.id, file);
@@ -160,7 +164,6 @@ public class TdlibEditMediaManager implements MessageEditMediaUploadCallback {
           }
 
           onUpdateFileImpl(file);
-          tdlib.files().subscribe(file, this);
         });
       });
     }

@@ -298,10 +298,11 @@ public class ReplyBarView extends FrameLayoutFix implements View.OnClickListener
   }
 
   public void setEditingMessage (TdApi.Message msg, @Nullable ImageFile forcedMediaFile) {
-    final boolean canEdit = tdlib.canEditMedia(msg);
+    final boolean canReplace = tdlib.canEditMedia(msg, false);
+    final boolean canEdit = canReplace && tdlib.canEditMedia(msg, true);
     pinnedMessagesBar.setMessage(tdlib, displayedMessage = msg, null, forcedMediaFile);
     setLinkPreviewToggleVisible(false);
-    setMediaEditToggleVisible(canEdit, canEdit && TD.isFileLoaded(msg));
+    setMediaEditToggleVisible(canReplace, canEdit && TD.isFileLoaded(msg));
     setMessageInputContext(null);
   }
 

@@ -331,6 +331,14 @@ public class FileComponent extends BaseComponent implements FileProgressComponen
     return progress;
   }
 
+  public void rebuildLayout () {
+    if (lastMaxWidth != 0) {
+      int width = lastMaxWidth;
+      lastMaxWidth = 0;
+      buildLayout(width);
+    }
+  }
+
   public void buildLayout (int maxWidth) {
     lastMaxWidth = maxWidth;
     if (waveform != null) {
