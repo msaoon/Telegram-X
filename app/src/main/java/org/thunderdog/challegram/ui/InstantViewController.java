@@ -106,6 +106,8 @@ public class InstantViewController extends ViewController<InstantViewController.
     if (id == R.id.menu_iv) {
       menu.addView(header.genButton(R.id.menu_btn_forward, R.drawable.baseline_share_arrow_24, getHeaderIconColorId(), this, Screen.dp(52f), ThemeDeprecated.headerSelector(), header), Lang.rtl() ? 0 : -1);
     }
+
+    menu.addView(header.genButton(R.id.menu_btn_copy, R.drawable.baseline_android_24, getHeaderIconColorId(), this, Screen.dp(52f), ThemeDeprecated.headerSelector(), header), Lang.rtl() ? 0 : -1);
   }
 
   @Override
@@ -149,6 +151,10 @@ public class InstantViewController extends ViewController<InstantViewController.
       }
       c.setArguments(args);
       c.show();
+    } else if (id == R.id.menu_btn_copy) {
+      TextPerformanceController c = new TextPerformanceController(context, tdlib);
+      c.setArguments(getArgumentsStrict().instantView);
+      navigateTo(c);
     }
   }
 
