@@ -1,9 +1,8 @@
 package org.thunderdog.challegram.ui;
 
 import android.content.Context;
-import android.util.Log;
+import android.graphics.Canvas;
 import android.view.View;
-import android.widget.FrameLayout;
 
 import androidx.annotation.NonNull;
 
@@ -12,19 +11,20 @@ import org.thunderdog.challegram.data.PageBlockRichText;
 import org.thunderdog.challegram.data.TD;
 import org.thunderdog.challegram.navigation.ViewController;
 import org.thunderdog.challegram.telegram.Tdlib;
+import org.thunderdog.challegram.tool.Paints;
+import org.thunderdog.challegram.tool.Screen;
 import org.thunderdog.challegram.tool.UI;
 import org.thunderdog.challegram.util.text.FormattedText;
 import org.thunderdog.challegram.util.text.Text;
 import org.thunderdog.challegram.util.text.TextColorSets;
-import org.thunderdog.challegram.widget.PageBlockView;
 
 import java.util.ArrayList;
 import java.util.concurrent.TimeUnit;
 
-public class TextPerformanceController extends ViewController<TdApi.WebPageInstantView> {
+public class TextPerformanceLayoutController extends ViewController<TdApi.WebPageInstantView> {
   private FormattedText[] formattedTexts;
 
-  public TextPerformanceController (@NonNull Context context, Tdlib tdlib) {
+  public TextPerformanceLayoutController (@NonNull Context context, Tdlib tdlib) {
     super(context, tdlib);
   }
 
@@ -44,40 +44,47 @@ public class TextPerformanceController extends ViewController<TdApi.WebPageInsta
     this.formattedTexts = formattedTextsL.toArray(new FormattedText[0]);
 
 
-    FrameLayout frameLayout = new FrameLayout(context) {
+    View v = new View(context) {
       @Override
       protected void onMeasure (int widthMeasureSpec, int heightMeasureSpec) {
         super.onMeasure(widthMeasureSpec, heightMeasureSpec);
         start();
       }
+
+      @Override
+      protected void onDraw (@NonNull Canvas canvas) {
+        super.onDraw(canvas);
+        canvas.drawText("Objects: " + formattedTexts.length, Screen.dp(50), Screen.dp(50), Paints.getTextPaint15());
+        canvas.drawText("Layout time: " + TimeUnit.NANOSECONDS.toMillis(sum / (Math.min(count, AVERAGE) * REPEATS)) + " ms", Screen.dp(50), Screen.dp(70), Paints.getTextPaint15());
+      }
     };
 
-    frameLayout.setBackgroundColor(0xFF00FF00);
+    v.setBackgroundColor(0xFFFFFFFF);
 
-    return frameLayout;
+    return v;
   }
 
 
-  private static final int REPEATS = 100;
+  private static final int REPEATS = 1;
+  private static final int AVERAGE = 10;
 
-  private int times = 0;
-  private long total = 0;
+  private long[] results = new long[AVERAGE];
+  private int index = 0;
+  private long sum = 0;
+  private int count;
+  private boolean started;
 
   private void start () {
-    if (times > 0 || isDestroyed()) {
+    if (isDestroyed() || started) {
       return;
     }
 
-    times = REPEATS;
-    total = 0;
-
-    Log.i("WTF_DEBUG", "Build Start: " + formattedTexts.length);
+    started = true;
     run();
   }
 
   private void run () {
-    if (times == 0 || isDestroyed()) {
-      Log.i("WTF_DEBUG", "Build End: " + TimeUnit.NANOSECONDS.toMillis(total / REPEATS));
+    if (isDestroyed()) {
       return;
     }
 
@@ -85,7 +92,7 @@ public class TextPerformanceController extends ViewController<TdApi.WebPageInsta
     final Text[] texts = new Text[formattedTexts.length];
     long s = System.nanoTime();
 
-    for (int N = 0; N < 1; N++) {
+    for (int N = 0; N < REPEATS; N++) {
       for (int a = 0; a < formattedTexts.length; a++) {
         FormattedText formattedText = formattedTexts[a];
         Text.Builder b = new Text.Builder(formattedText.text, width, PageBlockRichText.getParagraphProvider(), TextColorSets.InstantView.NORMAL).entities(formattedText.entities, null);
@@ -94,12 +101,13 @@ public class TextPerformanceController extends ViewController<TdApi.WebPageInsta
     }
 
     long e = System.nanoTime();
-    total += (e - s);
 
-
-
-
-    times -= 1;
+    sum -= results[index];
+    results[index] = e - s;
+    sum += results[index];
+    index = (index + 1) % AVERAGE;
+    count++;
+    getValue().invalidate();
 
     UI.post(this::run);
   }
