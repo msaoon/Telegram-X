@@ -56,6 +56,7 @@ public class TextPerformanceLayoutController extends ViewController<TdApi.WebPag
         super.onDraw(canvas);
         canvas.drawText("Objects: " + formattedTexts.length, Screen.dp(50), Screen.dp(50), Paints.getTextPaint15());
         canvas.drawText("Layout time: " + TimeUnit.NANOSECONDS.toMillis(sum / (Math.min(count, AVERAGE) * REPEATS)) + " ms", Screen.dp(50), Screen.dp(70), Paints.getTextPaint15());
+        canvas.drawText("Layout time (min): " + TimeUnit.NANOSECONDS.toMillis(min) + " ms", Screen.dp(50), Screen.dp(90), Paints.getTextPaint15());
       }
     };
 
@@ -73,6 +74,7 @@ public class TextPerformanceLayoutController extends ViewController<TdApi.WebPag
   private long sum = 0;
   private int count;
   private boolean started;
+  private long min = -1;
 
   private void start () {
     if (isDestroyed() || started) {
@@ -105,6 +107,7 @@ public class TextPerformanceLayoutController extends ViewController<TdApi.WebPag
     sum -= results[index];
     results[index] = e - s;
     sum += results[index];
+    min = min == -1 ? results[index] : Math.min(min, results[index]);
     index = (index + 1) % AVERAGE;
     count++;
     getValue().invalidate();

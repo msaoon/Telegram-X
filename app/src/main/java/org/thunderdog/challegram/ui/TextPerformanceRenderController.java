@@ -75,6 +75,7 @@ public class TextPerformanceRenderController extends ViewController<TdApi.WebPag
         sum -= results[index];
         results[index] = e - s;
         sum += results[index];
+        min = min == -1 ? results[index] : Math.min(min, results[index]);
         index = (index + 1) % AVERAGE;
         count++;
         getValue().invalidate();
@@ -82,6 +83,7 @@ public class TextPerformanceRenderController extends ViewController<TdApi.WebPag
 
         canvas.drawText("Objects: " + formattedTexts.length, Screen.dp(50), Screen.dp(50), Paints.getTextPaint15());
         canvas.drawText("Render time: " + TimeUnit.NANOSECONDS.toMillis(sum / (Math.min(count, AVERAGE) /* REPEATS */)) + " ms", Screen.dp(50), Screen.dp(70), Paints.getTextPaint15());
+        canvas.drawText("Render time (min): " + TimeUnit.NANOSECONDS.toMillis(min) + " ms", Screen.dp(50), Screen.dp(90), Paints.getTextPaint15());
       }
     };
 
@@ -98,7 +100,7 @@ public class TextPerformanceRenderController extends ViewController<TdApi.WebPag
   private int index = 0;
   private long sum = 0;
   private int count;
-
+  private long min = -1;
 
   @Override
   public int getId () {
