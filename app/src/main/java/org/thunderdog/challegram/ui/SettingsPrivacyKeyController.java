@@ -275,7 +275,7 @@ public class SettingsPrivacyKeyController extends RecyclerViewController<TdApi.U
         hintItem = new ListItem(ListItem.TYPE_DESCRIPTION, R.id.btn_description, 0, rulesType == PrivacySettings.Mode.EVERYBODY ? R.string.WhoCanFindByPhoneInfoEveryone : R.string.WhoCanFindByPhoneInfoContacts);
         TdApi.User user = tdlib.myUser();
         if (user != null) {
-          internalLinkType = new TdApi.InternalLinkTypeUserPhoneNumber(user.phoneNumber);
+          internalLinkType = new TdApi.InternalLinkTypeUserPhoneNumber(user.phoneNumber, "");
         }
         break;
       }
@@ -528,6 +528,10 @@ public class SettingsPrivacyKeyController extends RecyclerViewController<TdApi.U
   }
 
   private void updateExtraToggle (PrivacySettings newPrivacySettings) {
+    if (newPrivacySettings == null) {
+      // Primary privacy information isn't yet loaded.
+      return;
+    }
     int index = adapter.indexOfViewById(R.id.btn_togglePermission);
     boolean prevHadExtraToggle = index != -1;
     boolean nowHasExtraToggle = needExtraToggle(newPrivacySettings);

@@ -90,6 +90,7 @@
   <string name="format_minus">-%1$d</string>
   <string name="format_minusPlus">-%1$d, +%2$d</string>
   <string name="format_birthdateAndAge">%1$s (%2$s)</string>
+  <string name="format_birthdateAndTurns">%1$s (%2$s)</string>
   <string name="format_exceptionPlusPremium">%1$s, +premium</string>
   <string name="format_plusPremium">+premium</string>
   <string name="format_ping">ping: %1$sms</string>
@@ -163,17 +164,14 @@
   <string name="age_one">%1$s year old</string>
   <string name="age_other">%1$s years old</string>
 
-  <string name="turnsToday_one">Turns %1$s year old today</string>
-  <string name="turnsToday_other">Turns %1$s years old today</string>
+  <string name="turnsToday_one">turns %1$s today</string>
+  <string name="turnsToday_other">turns %1$s today</string>
 
-  <string name="turnsTomorrow_one">Turns %1$s year old tomorrow</string>
-  <string name="turnsTomorrow_other">Turns %1$s years old tomorrow</string>
+  <string name="turnsTomorrow_one">turns %1$s tomorrow</string>
+  <string name="turnsTomorrow_other">turns %1$s tomorrow</string>
 
-  <string name="turnSelfToday_one">Turning %1$s year old today</string>
-  <string name="turnSelfToday_other">Turning %1$s years old today</string>
-
-  <string name="turnSelfTomorrow_one">Turning %1$s year old tomorrow</string>
-  <string name="turnSelfTomorrow_other">Turning %1$s years old tomorrow</string>
+  <string name="turnSelfToday_one">turning %1$s today</string>
+  <string name="turnSelfToday_other">turning %1$s today</string>
 
   <string name="xSeconds_one">%1$s second</string>
   <string name="xSeconds_other">%1$s seconds</string>
@@ -446,8 +444,12 @@
   <string name="ChatContentLiveStreamInviteMulti_outgoing_one">Invited %1$s person to the live stream</string>
   <string name="ChatContentLiveStreamInviteMulti_outgoing_other">Invited %1$s people to the live stream</string>
 
-  <string name="ChatContentGiveaway_one"></string>
-  <string name="ChatContentGiveaway_other"></string>
+  <string name="ChatContentBoostedXTimes_outgoing_one">Boosted the group %1$s time</string>
+  <string name="ChatContentBoostedXTimes_outgoing_other">Boosted the group %1$s times</string>
+  <string name="ChatContentBoostedXTimes_one">Boosted the group %1$s time</string>
+  <string name="ChatContentBoostedXTimes_other">Boosted the group %1$s times</string>
+  <string name="ChatContentBoosted">Boosted the group</string>
+  <string name="ChatContentBoosted_outgoing">Boosted the group</string>
 
   <string name="Audio">Audio</string>
   <string name="Voice">Voice</string>
@@ -973,6 +975,7 @@
   <string name="SessionsIncompleteTitle">Incomplete Login Attempts</string>
   <string name="SessionsIncompleteInfo">The devices above have no access to your messages. The code was entered correctly, but no correct password was given.</string>
   <string name="TwoStepVerification">Two-Step Verification</string>
+  <string name="LoginEmail">Login Email</string>
   <string name="PasswordEnabled">Enabled</string>
   <string name="PasswordDisabled">Disabled</string>
   <string name="ThisDevice">This Device</string>
@@ -1575,6 +1578,7 @@
   <string name="Incoming">Incoming</string>
   <string name="CallAgain">Call Again</string>
   <string name="CallBack">Call Back</string>
+  <string name="ShareCallLogs">Share Call Diagnostics</string>
   <string name="Busy">Busy</string>
   <string name="TextSize">Message Font Size</string>
   <string name="TextSizeScaleEnable">Enable Size Scaling</string>
@@ -2957,6 +2961,7 @@
   <string name="TdlibLogs">TDLib Logs</string>
   <string name="TdlibLogsWarning">**Warning:** TDLib Logs may contain **private data**.\n\nDo not share them with anyone, unless you know what you are doing.</string>
   <string name="TdlibLogsWarningConfirm">Proceed</string>
+  <string name="CallLogsWarning">**Warning:** call diagnostics may contain **private data** such as IP addresses of the parties.\n\nDo not share them with anyone, unless you know what you are doing.</string>
 
   <string name="NoEmailApp">No email application found</string>
 
@@ -3173,6 +3178,9 @@
   <string name="ShareTitleFile">Share file to…</string>
   <string name="ShareTitleFileX_one">Share %1$s file to…</string>
   <string name="ShareTitleFileX_other">Share %1$s files to…</string>
+
+  <string name="ShareTitleFiles_one">Share %1$s file to…</string>
+  <string name="ShareTitleFiles_other">Share %1$s files to…</string>
 
   <string name="ShareTextMedia">Media from %1$s</string>
   <string name="ShareTitleMedia">Share media to…</string>
@@ -3576,6 +3584,10 @@
   <string name="EmojiSets">Emoji Sets</string>
   <string name="EmojiSetsInfo">Are you sure you want to clear unused emoji sets?</string>
   <string name="BigEmoji">Big Emoji</string>
+  <string name="DynamicStickerPackOrder">Dynamic Sets Order</string>
+  <string name="DynamicStickerPackOrderHint">Automatically place recently used sticker sets above others.</string>
+  <string name="DynamicEmojiPackOrder">Dynamic Pack Order</string>
+  <string name="DynamicEmojiPackOrderHint">Automatically place recently used emoji packs above others.</string>
 
   <string name="error_CHAT_ADMIN_REQUIRED">You do not have enough privileges to perform this action.</string>
   <string name="ChatPermissions">Chat Permissions</string>
@@ -3747,10 +3759,6 @@
   <string name="ChatListStyle1">Two lines</string>
   <string name="ChatListStyle2">Three lines</string>
   <string name="ChatListStyle3">Three lines (bigger text)</string>
-
-  <!--<string name="TonLogsWarning">**Warning:** TON Logs may contain your wallet\'s **private key**.\n\nDo not share them with anyone, unless you know what you are doing.</string>
-  <string name="TonLogs">TON Logs</string>
-  <string name="Wallet">Wallet</string>-->
 
   <string name="format_tracksAndDuration">%1$s, %2$s</string>
 
@@ -4775,7 +4783,7 @@
 
   <string name="RequestToJoinGroupInfo">This group accepts new members only after they are being accepted by admins.</string>
   <string name="RequestToJoinChannelInfo">This channel accepts new subscribers only after they are approved by its admins.</string>
-  <string name="ProxyLinkUnsupported">Proxy is unsupported or link is invalid.</string>
+  <string name="ProxyLinkUnsupported">Proxy link is invalid.</string>
 
   <string name="ScamMark">SCAM</string>
   <string name="FakeMark">FAKE</string>
@@ -5336,11 +5344,28 @@
   <string name="DeactivatingUsername">Deactivating username, please wait…</string>
   <string name="DeactivatingLink">Deactivating public link, please wait…</string>
 
+  <string name="DraftPreFillWarning">Your previous draft message in this chat is about to be replaced.</string>
+
   <string name="AllowPremiumInvite">**Telegram Premium** subscribers</string>
   <string name="AllowPremiumInviteDesc">Always allow users with **Telegram Premium** subscription to add you to groups and channels.</string>
 
   <string name="HideReadTime">Hide Read Time</string>
   <string name="HideReadTimeDesc">Hide the time when you read messages from people who can\'t see your last seen. If you turn this on, their read time will also be hidden from you (unless you are a Premium user).\n\nThis setting does not affect group chats.</string>
+
+  <string name="ChangeEmailPromptText">This email address will be used every time you log in to your Telegram account from a new device.</string>
+  <string name="ChangeEmailPromptButton">Change Email</string>
+  <string name="ChangeEmailInfo">You will receive Telegram login codes via email and not SMS. Please enter an email address to which you have access.</string>
+  <string name="ChangeEmailHint">Your new email</string>
+  <string name="ChangeEmailResend">Re-send Code</string>
+  <string name="ChangeEmailResendConfirm">New email was sent to %1$s.</string>
+  <string name="ChangeEmailConfirmCode">Please enter the code that we have sent to your new email %1$s.</string>
+
+  <string name="ChatBoosted">%1$s boosted the group</string>
+  <string name="ChatBoosted_outgoing">You boosted the group</string>
+  <string name="ChatBoostedXTimes_one">%2$s boosted the group %1$s time</string>
+  <string name="ChatBoostedXTimes_other">%2$s boosted the group %1$s times</string>
+  <string name="ChatBoostedXTimes_outgoing_one">You boosted the group %1$s time</string>
+  <string name="ChatBoostedXTimes_outgoing_other">You boosted the group %1$s times</string>
 
   <string name="ReadDate_now">Read just now</string>
   <string name="ReadDate_seconds_one">Read %1$s second ago</string>
@@ -5351,7 +5376,7 @@
   <string name="ReadDate_hours_other">Read %1$s hours ago</string>
   <string name="ReadDate_today">Read at %1$s</string>
   <string name="ReadDate_yesterday">Read yesterday at %1$s</string>
-  <string name="ReadDate_weekday">Read %1$s at %2$s</string>
+  <string name="ReadDate_weekday">Read on %1$s at %2$s</string>
   <string name="ReadDate_date">Read %1$s at %2$s</string>
 
 </resources>
