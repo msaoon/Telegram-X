@@ -100,7 +100,20 @@ public class Strings {
         1 << android.icu.lang.UCharacter.DIRECTIONALITY_ARABIC_NUMBER);
 
       for (int i = start; i < end; ++i) {
-        if (((1 << android.icu.lang.UCharacter.getDirection(text.charAt(i))) & RTLMask) != 0) {
+        final char c = text.charAt(i);
+        final int codePoint;
+        if (!Character.isHighSurrogate(c) || i >= (end - 1)) {
+          codePoint = c;
+        } else {
+          final char c2 = text.charAt(i + 1);
+          if (Character.isLowSurrogate(c2)) {
+            i++;
+            codePoint = Character.toCodePoint(c, c2);
+          } else {
+            codePoint = c;
+          }
+        }
+        if (((1 << android.icu.lang.UCharacter.getDirection(codePoint)) & RTLMask) != 0) {
           return true;
         }
       }
@@ -113,7 +126,20 @@ public class Strings {
         1 << Character.DIRECTIONALITY_ARABIC_NUMBER);
 
       for (int i = start; i < end; ++i) {
-        if (((1 << Character.getDirectionality(text.charAt(i))) & RTLMask) != 0) {
+        final char c = text.charAt(i);
+        final int codePoint;
+        if (!Character.isHighSurrogate(c) || i >= (end - 1)) {
+          codePoint = c;
+        } else {
+          final char c2 = text.charAt(i + 1);
+          if (Character.isLowSurrogate(c2)) {
+            i++;
+            codePoint = Character.toCodePoint(c, c2);
+          } else {
+            codePoint = c;
+          }
+        }
+        if (((1 << Character.getDirectionality(text.charAt(codePoint))) & RTLMask) != 0) {
           return true;
         }
       }
@@ -132,7 +158,20 @@ public class Strings {
         1 << android.icu.lang.UCharacter.DIRECTIONALITY_ARABIC_NUMBER);
 
       for (int i = start; i < end; ++i) {
-        if (((1 << android.icu.lang.UCharacter.getDirection(text[i])) & RTLMask) != 0) {
+        final char c = text[i];
+        final int codePoint;
+        if (!Character.isHighSurrogate(c) || i >= (end - 1)) {
+          codePoint = c;
+        } else {
+          final char c2 = text[i + 1];
+          if (Character.isLowSurrogate(c2)) {
+            i++;
+            codePoint = Character.toCodePoint(c, c2);
+          } else {
+            codePoint = c;
+          }
+        }
+        if (((1 << android.icu.lang.UCharacter.getDirection(codePoint)) & RTLMask) != 0) {
           return true;
         }
       }
@@ -145,7 +184,20 @@ public class Strings {
         1 << Character.DIRECTIONALITY_ARABIC_NUMBER);
 
       for (int i = start; i < end; ++i) {
-        if (((1 << Character.getDirectionality(text[i])) & RTLMask) != 0) {
+        final char c = text[i];
+        final int codePoint;
+        if (!Character.isHighSurrogate(c) || i >= (end - 1)) {
+          codePoint = c;
+        } else {
+          final char c2 = text[i + 1];
+          if (Character.isLowSurrogate(c2)) {
+            i++;
+            codePoint = Character.toCodePoint(c, c2);
+          } else {
+            codePoint = c;
+          }
+        }
+        if (((1 << Character.getDirectionality(codePoint)) & RTLMask) != 0) {
           return true;
         }
       }
