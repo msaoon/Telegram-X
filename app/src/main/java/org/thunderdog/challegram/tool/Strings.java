@@ -139,7 +139,7 @@ public class Strings {
             codePoint = c;
           }
         }
-        if (((1 << Character.getDirectionality(text.charAt(codePoint))) & RTLMask) != 0) {
+        if (((1 << Character.getDirectionality(codePoint)) & RTLMask) != 0) {
           return true;
         }
       }
